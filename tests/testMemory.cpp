@@ -17,7 +17,7 @@ STEST_F(IntBufFixture, CanConstruct) { }
 // Type checks are disabled in non-debug builds for the sake of performance.
 #ifdef RTT_BUF_ENABLE_TYPE_CHECKS
 STEST_F(IntBufFixture, TypeChecksWork) {
-    EXPECT_THROWS(buf.checkType<float>(), RTTBuffer::BadTypeCast);
+    EXPECT_THROWS(buf.at<float>(0), RTTBuffer::BadTypeCast);
 }
 #endif
 

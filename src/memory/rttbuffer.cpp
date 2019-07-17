@@ -33,5 +33,9 @@ namespace Stealth::Engine {
         return mType;
     }
 
-
+    void RTTBuffer::checkBounds(size_t index) const {
+        if (index >= mSize) {
+            throw std::out_of_range{std::to_string(index) + " is out of range of this buffer, which has size: " + std::to_string(mSize)};
+        }
+    }
 } // Stealth::Engine

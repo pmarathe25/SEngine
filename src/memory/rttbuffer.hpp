@@ -24,18 +24,6 @@ namespace Stealth::Engine {
         RTTBuffer() = delete;
         RTTBuffer(TypeRef&& ref, size_t elementSize, size_t initialSize);
 
-        template <typename T>
-        void checkType() const {
-#ifdef RTT_BUF_ENABLE_TYPE_CHECKS
-            TypeRef toType = std::cref(typeid(T));
-            if (toType.get() != mType.get()) {
-                LOG_ERROR() << "Could not cast " << mType.get().name() << " (" << mElementSize << " bytes) to "
-                    << toType.get().name() << " (" << sizeof(T) << " bytes)" << std::endl;
-                throw BadTypeCast{};
-            }
-#endif
-        }
-
         // TODO: Add Copy and Move constructors
 
         // TODO: Add Copy and Move assignment
@@ -52,15 +40,24 @@ namespace Stealth::Engine {
 
         // Data accessors
         template <typename T>
-        T& at(size_t index) const {
-            if (index >= mSize) {
-                throw std::out_of_range{std::to_string(index) + " is out of range of this buffer, which has size: " + std::to_string(mSize)};
-            }
+        T& at(size_t index) {
+            this->checkBounds(index);
             return this->atUnchecked<T>(index);
         }
 
         template <typename T>
-        T& atUnchecked(size_t index) const {
+        T& atUnchecked(size_t index) {
+            return this->data<T>()[index];
+        }
+
+        template <typename T>
+        const T& at(size_t index) const {
+            this->checkBounds(index);
+            return this->atUnchecked<T>(index);
+        }
+
+        template <typename T>
+        const T& atUnchecked(size_t index) const {
             return this->data<T>()[index];
         }
 
@@ -69,6 +66,22 @@ namespace Stealth::Engine {
             this->checkType<T>();
             return reinterpret_cast<T*>(mData.get());
         }
+
+    private:
+        template <typename T>
+        void checkType() const {
+#ifdef RTT_BUF_ENABLE_TYPE_CHECKS
+            TypeRef toType = std::cref(typeid(T));
+            if (toType.get() != mType.get()) {
+                LOG_ERROR() << "Could not cast " << mType.get().name() << " (" << mElementSize << " bytes) to "
+                    << toType.get().name() << " (" << sizeof(T) << " bytes)" << std::endl;
+                throw BadTypeCast{};
+            }
+#endif
+        }
+
+        void checkBounds(size_t index) const;
+
     private:
         TypeRef mType;
         std::unique_ptr<std::byte[]> mData{nullptr};
