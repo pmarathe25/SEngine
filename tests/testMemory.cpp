@@ -16,7 +16,7 @@ class IntBufFixture : public RTTBufFixture<int> {
 protected:
     void iota(size_t size = INITIAL_CAPACITY) {
         for (int i = 0; i < size; ++i) {
-            buf.emplace_back<int>(i);
+            buf.emplaceBack<int>(i);
         }
     }
 };
@@ -76,7 +76,7 @@ STEST_F(IntBufFixture, UncheckedAccessorDoesNotThrow) {
 
 STEST_F(IntBufFixture, PushBack) {
     for (int i = 0; i < INITIAL_CAPACITY; ++i) {
-        buf.push_back(i);
+        buf.pushBack(i);
     }
     for (int i = 0; i < buf.size(); ++i) {
         EXPECT_EQ(buf.at<int>(i), i);
@@ -86,7 +86,7 @@ STEST_F(IntBufFixture, PushBack) {
 
 STEST_F(IntBufFixture, EmplaceBack) {
     for (int i = 0; i < INITIAL_CAPACITY; ++i) {
-        buf.emplace_back<int>(i);
+        buf.emplaceBack<int>(i);
     }
     for (int i = 0; i < buf.size(); ++i) {
         EXPECT_EQ(buf.at<int>(i), i);
@@ -103,7 +103,7 @@ STEST_F(IntBufFixture, Reserve) {
     EXPECT_EQ(buf.capacity(), NEW_CAPACITY);
 }
 
-// TODO: Copy and move tests
+// TODO: Copy and move assignment ests
 
 int main(int argc, const char* argv[]) {
     return static_cast<int>(RUN_STESTS(argc, argv));

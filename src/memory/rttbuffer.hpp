@@ -44,12 +44,12 @@ namespace Stealth::Engine {
         void reserve(size_t newSize);
 
         template <typename T>
-        T& push_back(T&& value) {
-            return this->emplace_back<std::remove_cv_t<std::remove_reference_t<T>>>(std::forward<T&&>(value));
+        T& pushBack(T&& value) {
+            return this->emplaceBack<std::remove_cv_t<std::remove_reference_t<T>>>(std::forward<T&&>(value));
         }
 
         template <typename T, typename... Args>
-        T& emplace_back(Args&&... args) {
+        T& emplaceBack(Args&&... args) {
             ++mSizeInfo.size;
             this->reserve(mSizeInfo.size);
             this->atUnchecked<T>(mSizeInfo.size - 1) = std::move(T{args...});
@@ -62,7 +62,7 @@ namespace Stealth::Engine {
         constexpr size_t numBytes() const { return mSizeInfo.size * this->elementSize(); }
         constexpr size_t elementSize() const { return mTypeInfo.size; }
         constexpr const std::type_info& type() const { return mTypeInfo.type; }
-        
+
         // Data accessors
         template <typename T>
         T& at(size_t index) {
