@@ -56,7 +56,7 @@ STEST_F(IntBufFixture, MoveConstruct) {
     // Verify buf
     EXPECT_EQ(buf.size(), 0);
     EXPECT_EQ(buf.capacity(), 0);
-    EXPECT_EQ(buf.dataUnchecked(), nullptr);
+    EXPECT_EQ(buf.data<int>(), nullptr);
 }
 
 // Type checks are disabled in non-debug builds for the sake of performance.

@@ -92,11 +92,6 @@ namespace Stealth::Engine {
             return reinterpret_cast<T*>(mData.get());
         }
 
-        template <typename T = void>
-        T* dataUnchecked() const {
-            return reinterpret_cast<T*>(mData.get());
-        }
-
     private:
         template <typename T>
         void checkType() const {
