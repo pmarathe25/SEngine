@@ -28,26 +28,6 @@ namespace Stealth::Engine {
         mSizeInfo.capacity = newSize;
     }
 
-    size_t RTTBuffer::size() const {
-        return mSizeInfo.size;
-    }
-
-    size_t RTTBuffer::capacity() const {
-        return mSizeInfo.capacity;
-    }
-
-    size_t RTTBuffer::numBytes() const {
-        return mSizeInfo.size * this->elementSize();
-    }
-
-    size_t RTTBuffer::elementSize() const {
-        return mTypeInfo.size;
-    }
-
-    const std::type_info& RTTBuffer::type() const {
-        return mTypeInfo.type;
-    }
-
     void RTTBuffer::checkBounds(size_t index) const {
         if (index >= mSizeInfo.size) {
             throw std::out_of_range{std::to_string(index) + " is out of range of this buffer, which has size: " + std::to_string(mSizeInfo.size)};

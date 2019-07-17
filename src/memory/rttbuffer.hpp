@@ -57,12 +57,12 @@ namespace Stealth::Engine {
         }
 
         // Metadata
-        size_t size() const;
-        size_t capacity() const;
-        size_t numBytes() const;
-        size_t elementSize() const;
-        const std::type_info& type() const;
-
+        constexpr size_t size() const { return mSizeInfo.size; }
+        constexpr size_t capacity() const { return mSizeInfo.capacity; }
+        constexpr size_t numBytes() const { return mSizeInfo.size * this->elementSize(); }
+        constexpr size_t elementSize() const { return mTypeInfo.size; }
+        constexpr const std::type_info& type() const { return mTypeInfo.type; }
+        
         // Data accessors
         template <typename T>
         T& at(size_t index) {
