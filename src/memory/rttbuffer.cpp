@@ -15,6 +15,24 @@ namespace Stealth::Engine {
         other.mSizeInfo.size = 0;
     }
 
+    RTTBuffer& RTTBuffer::operator=(const RTTBuffer& other) {
+        mTypeInfo = other.mTypeInfo;
+        mSizeInfo = other.mSizeInfo;
+        mData.reset(new std::byte[other.capacity() * other.elementSize()]);
+        std::memcpy(mData.get(), other.mData.get(), other.capacity() * other.elementSize());
+        return (*this);
+    }
+
+    RTTBuffer& RTTBuffer::operator=(RTTBuffer&& other) {
+        mTypeInfo = other.mTypeInfo;
+        mSizeInfo = other.mSizeInfo;
+        mData.reset(other.mData.release());
+
+        other.mSizeInfo.capacity = 0;
+        other.mSizeInfo.size = 0;
+        return (*this);
+    }
+
     void RTTBuffer::reserve(size_t newSize) {
         if (newSize <= mSizeInfo.capacity) {
             return;

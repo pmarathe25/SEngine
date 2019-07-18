@@ -13,7 +13,8 @@ namespace Stealth::Engine {
     class RTTBuffer {
     private:
         struct TypeInfo {
-            const std::type_info& type;
+            using TypeRef = std::reference_wrapper<const std::type_info>;
+            TypeRef type;
             size_t size;
         } mTypeInfo;
 
@@ -34,11 +35,10 @@ namespace Stealth::Engine {
         }
 
         RTTBuffer() = delete;
-
         RTTBuffer(const RTTBuffer& other);
         RTTBuffer(RTTBuffer&& other);
-
-        // TODO: Add Copy and Move assignment
+        RTTBuffer& operator=(const RTTBuffer& other);
+        RTTBuffer& operator=(RTTBuffer&& other);
 
         // Buffer operations
         void reserve(size_t newSize);
@@ -61,7 +61,7 @@ namespace Stealth::Engine {
         constexpr size_t capacity() const { return mSizeInfo.capacity; }
         constexpr size_t numBytes() const { return mSizeInfo.size * this->elementSize(); }
         constexpr size_t elementSize() const { return mTypeInfo.size; }
-        constexpr const std::type_info& type() const { return mTypeInfo.type; }
+        constexpr const std::type_info& type() const { return mTypeInfo.type.get(); }
 
         // Data accessors
         template <typename T>
@@ -71,14 +71,14 @@ namespace Stealth::Engine {
         }
 
         template <typename T>
-        T& atUnchecked(size_t index) {
-            return this->data<T>()[index];
-        }
-
-        template <typename T>
         const T& at(size_t index) const {
             this->checkBounds(index);
             return this->atUnchecked<T>(index);
+        }
+
+        template <typename T>
+        T& atUnchecked(size_t index) {
+            return this->data<T>()[index];
         }
 
         template <typename T>
@@ -97,8 +97,8 @@ namespace Stealth::Engine {
         void checkType() const {
 #ifdef RTT_BUF_ENABLE_TYPE_CHECKS
             const auto& toType = typeid(T);
-            if (toType != mTypeInfo.type) {
-                LOG_ERROR() << "Could not cast " << mTypeInfo.type.name() << " (" << this->elementSize() << " bytes) to "
+            if (toType != mTypeInfo.type.get()) {
+                LOG_ERROR() << "Could not cast " << mTypeInfo.type.get().name() << " (" << this->elementSize() << " bytes) to "
                     << toType.name() << " (" << sizeof(T) << " bytes)" << std::endl;
                 throw BadTypeCast{};
             }

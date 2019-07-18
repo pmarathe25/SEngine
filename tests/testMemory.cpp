@@ -21,43 +21,70 @@ protected:
     }
 };
 
-STEST_F(IntBufFixture, Construct) { }
+namespace ConstructorAssignmentTests {
+    STEST_F(IntBufFixture, Construct) { }
 
-STEST_F(IntBufFixture, CopyConstruct) {
-    iota();
-    RTTBuffer buf2{buf};
-    for (int i = 0; i < buf.size(); ++i) {
-        EXPECT_EQ(buf.at<int>(i), buf2.at<int>(i));
+    void checkBufferEquality(const RTTBuffer& lhs, const RTTBuffer& rhs) {
+        for (int i = 0; i < lhs.size(); ++i) {
+            EXPECT_EQ(lhs.at<int>(i), rhs.at<int>(i));
+        }
+        EXPECT_EQ(lhs.size(), rhs.size());
+        EXPECT_EQ(lhs.capacity(), rhs.capacity());
+
+        EXPECT_EQ(lhs.type(), rhs.type());
+        EXPECT_EQ(lhs.elementSize(), rhs.elementSize());
     }
-    EXPECT_EQ(buf.size(), buf2.size());
-    EXPECT_EQ(buf.capacity(), buf2.capacity());
 
-    EXPECT_EQ(buf.type(), buf2.type());
-    EXPECT_EQ(buf.elementSize(), buf2.elementSize());
-}
-
-STEST_F(IntBufFixture, MoveConstruct) {
-    iota();
-    size_t size = buf.size();
-    size_t capacity = buf.capacity();
-    const auto& type = buf.type();
-    size_t elementSize = buf.elementSize();
-
-    RTTBuffer buf2{std::move(buf)};
-    // Verify buf2
-    for (int i = 0; i < buf.size(); ++i) {
-        EXPECT_EQ(buf2.at<int>(i), i);
+    STEST_F(IntBufFixture, CopyConstruct) {
+        iota();
+        RTTBuffer buf2{buf};
+        checkBufferEquality(buf, buf2);
     }
-    EXPECT_EQ(buf2.size(), size);
-    EXPECT_EQ(buf2.capacity(), capacity);
 
-    EXPECT_EQ(buf2.type(), type);
-    EXPECT_EQ(buf2.elementSize(), elementSize);
-    // Verify buf
-    EXPECT_EQ(buf.size(), 0);
-    EXPECT_EQ(buf.capacity(), 0);
-    EXPECT_EQ(buf.data<int>(), nullptr);
-}
+    STEST_F(IntBufFixture, CopyAssign) {
+        iota();
+        RTTBuffer buf2 = buf;
+        checkBufferEquality(buf, buf2);
+    }
+
+    void checkBufferMoved(const RTTBuffer& oldBuffer, const RTTBuffer& newBuffer, size_t oldSize, size_t oldCapacity, const std::type_info& oldType, size_t oldElementSize) {
+        // Verify the new buffer is correct.
+        for (int i = 0; i < newBuffer.size(); ++i) {
+            EXPECT_EQ(newBuffer.at<int>(i), i);
+        }
+        EXPECT_EQ(newBuffer.size(), oldSize);
+        EXPECT_EQ(newBuffer.capacity(), oldCapacity);
+
+        EXPECT_EQ(newBuffer.type(), oldType);
+        EXPECT_EQ(newBuffer.elementSize(), oldElementSize);
+        // Verify buf
+        EXPECT_EQ(oldBuffer.size(), 0);
+        EXPECT_EQ(oldBuffer.capacity(), 0);
+        EXPECT_EQ(oldBuffer.data<int>(), nullptr);
+    }
+
+    STEST_F(IntBufFixture, MoveConstruct) {
+        iota();
+        size_t size = buf.size();
+        size_t capacity = buf.capacity();
+        const auto& type = buf.type();
+        size_t elementSize = buf.elementSize();
+
+        RTTBuffer buf2{std::move(buf)};
+        checkBufferMoved(buf, buf2, size, capacity, type, elementSize);
+    }
+
+    STEST_F(IntBufFixture, MoveAssign) {
+        iota();
+        size_t size = buf.size();
+        size_t capacity = buf.capacity();
+        const auto& type = buf.type();
+        size_t elementSize = buf.elementSize();
+
+        RTTBuffer buf2 = std::move(buf);
+        checkBufferMoved(buf, buf2, size, capacity, type, elementSize);
+    }
+} // ConstructorAssignmentTests
 
 // Type checks are disabled in non-debug builds for the sake of performance.
 #ifdef RTT_BUF_ENABLE_TYPE_CHECKS
@@ -103,8 +130,6 @@ STEST_F(IntBufFixture, Reserve) {
     EXPECT_EQ(buf.capacity(), NEW_CAPACITY);
 }
 
-// TODO: Copy and move assignment ests
+// TODO: Copy and move assignment tests
 
-int main(int argc, const char* argv[]) {
-    return static_cast<int>(RUN_STESTS(argc, argv));
-}
+STEST_MAIN();
