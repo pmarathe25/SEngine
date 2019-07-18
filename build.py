@@ -2,7 +2,7 @@
 import sbuildr
 import glob
 
-project = sbuildr.Project(version="0.1.0")
+project = sbuildr.Project()
 
 libsengine = project.library("sengine", sources=glob.glob("src/**/*.cpp", recursive=True), libs=["stdc++", "slog"])
 

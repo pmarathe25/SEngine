@@ -34,6 +34,7 @@ namespace Stealth::Engine {
     }
 
     void RTTBuffer::reserve(size_t newSize) {
+        LOG_DEBUG() << "Requested reservation of " << newSize << " elements" << std::endl;
         if (newSize <= mSizeInfo.capacity) {
             return;
         }

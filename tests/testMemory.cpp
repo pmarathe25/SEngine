@@ -3,18 +3,18 @@
 
 using Stealth::Engine::RTTBuffer;
 
-static constexpr size_t INITIAL_SIZE = 0;
-static constexpr size_t INITIAL_CAPACITY = 5;
+static constexpr size_t DEFAULTL_SIZE = 0;
+static constexpr size_t DEFAULT_CAPACITY = 5;
 
 template <typename T>
 class RTTBufFixture {
 protected:
-    RTTBuffer buf{RTTBuffer::create<T>(INITIAL_CAPACITY)};
+    RTTBuffer buf{RTTBuffer::create<T>(DEFAULT_CAPACITY)};
 };
 
 class IntBufFixture : public RTTBufFixture<int> {
 protected:
-    void iota(size_t size = INITIAL_CAPACITY) {
+    void iota(size_t size = DEFAULT_CAPACITY) {
         for (int i = 0; i < size; ++i) {
             buf.emplaceBack<int>(i);
         }
@@ -102,7 +102,7 @@ STEST_F(IntBufFixture, UncheckedAccessorDoesNotThrow) {
 }
 
 STEST_F(IntBufFixture, PushBack) {
-    for (int i = 0; i < INITIAL_CAPACITY; ++i) {
+    for (int i = 0; i < DEFAULT_CAPACITY; ++i) {
         buf.pushBack(i);
     }
     for (int i = 0; i < buf.size(); ++i) {
@@ -112,7 +112,7 @@ STEST_F(IntBufFixture, PushBack) {
 }
 
 STEST_F(IntBufFixture, EmplaceBack) {
-    for (int i = 0; i < INITIAL_CAPACITY; ++i) {
+    for (int i = 0; i < DEFAULT_CAPACITY; ++i) {
         buf.emplaceBack<int>(i);
     }
     for (int i = 0; i < buf.size(); ++i) {
@@ -121,12 +121,31 @@ STEST_F(IntBufFixture, EmplaceBack) {
     EXPECT_EQ(buf.elementSize(), sizeof(int));
 }
 
+STEST(EmplaceBackDoesNotCauseExcessiveReallocation) {
+    // To emplace 8 elements, only 3 reallocations should occur -> 0->2->4->8
+    RTTBuffer buf{RTTBuffer::create<int>(0)};
+    static constexpr int DESIRED_CAPACITY = 8;
+
+    size_t currentCapacity{buf.capacity()};
+    size_t numReallocations{0};
+
+    for (int i = 0; i < DESIRED_CAPACITY; ++i) {
+        buf.emplaceBack<int>(i);
+        if (buf.capacity() != currentCapacity) {
+            currentCapacity = buf.capacity();
+            ++numReallocations;
+        }
+    }
+
+    EXPECT_EQ(numReallocations, 3);
+}
+
 STEST_F(IntBufFixture, Reserve) {
-    EXPECT_EQ(buf.size(), INITIAL_SIZE);
-    EXPECT_EQ(buf.capacity(), INITIAL_CAPACITY);
-    static constexpr size_t NEW_CAPACITY = INITIAL_CAPACITY * 2 + 1;
+    EXPECT_EQ(buf.size(), DEFAULTL_SIZE);
+    EXPECT_EQ(buf.capacity(), DEFAULT_CAPACITY);
+    static constexpr size_t NEW_CAPACITY = DEFAULT_CAPACITY * 2 + 1;
     buf.reserve(NEW_CAPACITY);
-    EXPECT_EQ(buf.size(), INITIAL_SIZE);
+    EXPECT_EQ(buf.size(), DEFAULTL_SIZE);
     EXPECT_EQ(buf.capacity(), NEW_CAPACITY);
 }
 

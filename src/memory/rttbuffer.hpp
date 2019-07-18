@@ -15,11 +15,11 @@ namespace Stealth::Engine {
         struct TypeInfo {
             using TypeRef = std::reference_wrapper<const std::type_info>;
             TypeRef type;
-            size_t size;
+            size_t size{0};
         } mTypeInfo;
 
         struct SizeInfo {
-            size_t size, capacity;
+            size_t size{0}, capacity{0};
         } mSizeInfo;
 
         std::unique_ptr<std::byte[]> mData{nullptr};
@@ -50,8 +50,11 @@ namespace Stealth::Engine {
 
         template <typename T, typename... Args>
         T& emplaceBack(Args&&... args) {
+            // Binary exponential backoff, reserving at least 2 spots.
+            if (mSizeInfo.size == mSizeInfo.capacity) {
+                this->reserve((mSizeInfo.capacity ? mSizeInfo.capacity : 1) * 2);
+            }
             ++mSizeInfo.size;
-            this->reserve(mSizeInfo.size);
             this->atUnchecked<T>(mSizeInfo.size - 1) = std::move(T{args...});
             return this->atUnchecked<T>(mSizeInfo.size - 1);
         }
