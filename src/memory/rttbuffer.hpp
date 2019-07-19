@@ -10,7 +10,16 @@
 
 namespace Stealth::Engine {
     // A runtime type-checked buffer.
+    // TODO: Use a TypedView so that every single function doesn't need to be provided the type.
     class RTTBuffer {
+    public:
+        class BadTypeCast : public std::exception { };
+
+        template <typename T>
+        static RTTBuffer create(size_t initialCapacity = 0) {
+            return RTTBuffer{TypeInfo{typeid(T), sizeof(T)}, initialCapacity};
+        }
+        
     private:
         struct TypeInfo {
             using TypeRef = std::reference_wrapper<const std::type_info>;
@@ -25,16 +34,9 @@ namespace Stealth::Engine {
         std::unique_ptr<std::byte[]> mData{nullptr};
 
         RTTBuffer(TypeInfo&& info, size_t initialCapacity);
+        RTTBuffer() = delete;
 
     public:
-        class BadTypeCast : public std::exception { };
-
-        template <typename T>
-        static RTTBuffer create(size_t initialCapacity = 0) {
-            return RTTBuffer{TypeInfo{typeid(T), sizeof(T)}, initialCapacity};
-        }
-
-        RTTBuffer() = delete;
         RTTBuffer(const RTTBuffer& other);
         RTTBuffer(RTTBuffer&& other);
         RTTBuffer& operator=(const RTTBuffer& other);

@@ -149,6 +149,4 @@ STEST_F(IntBufFixture, Reserve) {
     EXPECT_EQ(buf.capacity(), NEW_CAPACITY);
 }
 
-// TODO: Copy and move assignment tests
-
 STEST_MAIN();
