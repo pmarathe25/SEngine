@@ -6,18 +6,21 @@
 
 namespace Stealth::Engine {
     template <typename... ComponentTypes>
+    struct Archetype;
+
+    template <typename... ComponentTypes>
     class ArchetypeGroup {
     private:
         std::tuple<std::vector<ComponentTypes>...> mComponents;
     public:
-        constexpr ArchetypeGroup() {
-            static_assert(packIsUnique<ComponentTypes...>(), "Cannot create ArchetypeGroup with duplicate component types");
-        }
+        // When an ArchetypeGroup is constructed, it will check whether it contains duplicate component types
+        // using Archetype's static_asserts.
+        constexpr ArchetypeGroup(Archetype<ComponentTypes...> = {}) { }
     };
 
     template <typename... ComponentTypes>
     struct Archetype {
-        static_assert(packIsUnique<ComponentTypes...>(), "Cannot create archetype with duplicate component types");
+        static_assert(packIsUnique<ComponentTypes...>(), "Archetype cannot contain duplicate component types");
 
         using GroupType = ArchetypeGroup<ComponentTypes...>;
 
