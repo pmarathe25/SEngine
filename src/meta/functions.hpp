@@ -10,6 +10,10 @@ namespace Stealth::Engine {
     template <typename Elem, typename... Args>
     constexpr bool packContains() noexcept;
 
+    // Determines the index at which a parameter pack, Args, contains the specified type, Elem.
+    template <typename Elem, typename... Args>
+    constexpr int packIndex() noexcept;
+
     // Determines whether a parameter pack contains unique types.
     template <typename... Args>
     constexpr bool packIsUnique() noexcept;
@@ -27,6 +31,23 @@ namespace Stealth::Engine {
     template <typename Elem, typename... Args>
     constexpr bool packContains() noexcept {
         return (std::is_same_v<Elem, Args> || ...);
+    }
+
+
+    template <typename Elem, int Index, typename First, typename... Args>
+    constexpr int packIndexImpl() noexcept {
+        if constexpr (std::is_same_v<Elem, First>) {
+            return Index;
+        } else {
+            // sizeof...(Args) will always be at least 1. The function will return before it reaches 0.
+            return packIndexImpl<Elem, Index + 1, Args...>();
+        }
+    }
+
+    template <typename Elem, typename... Args>
+    constexpr int packIndex() noexcept {
+        static_assert(packContains<Elem, Args...>(), "Cannot find index of type, because pack does not contain this type");
+        return packIndexImpl<Elem, 0, Args...>();
     }
 
 

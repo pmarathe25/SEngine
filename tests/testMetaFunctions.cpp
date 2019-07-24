@@ -1,7 +1,7 @@
 #include "meta/functions.hpp"
 #include <Stealth/STest.hpp>
 
-using Stealth::Engine::packContains, Stealth::Engine::packIsUnique, Stealth::Engine::packIsSubset, Stealth::Engine::packsAreEquivalent;
+using Stealth::Engine::packContains, Stealth::Engine::packIsUnique, Stealth::Engine::packIsSubset, Stealth::Engine::packsAreEquivalent, Stealth::Engine::packIndex;
 
 namespace PackContainsTests {
     STEST(PackDoesContainType) {
@@ -17,6 +17,18 @@ namespace PackContainsTests {
         EXPECT_FALSE((packContains<uint8_t>()));
     }
 } // PackContainsTests
+
+namespace PackIndexTests {
+    STEST(PackIndexCorrect) {
+        EXPECT_EQ((packIndex<int32_t, float, char, double, uint8_t, int32_t>()), 4);
+        EXPECT_EQ((packIndex<int32_t, int32_t, float, char, double, uint8_t>()), 0);
+    }
+
+    STEST(PackIndexInDuplicateReturnsFirstIndex) {
+        EXPECT_EQ((packIndex<int32_t, float, char, int32_t, double, uint8_t, int32_t>()), 2);
+        EXPECT_EQ((packIndex<char, float, double, int32_t, char, char, double, uint8_t, int32_t>()), 3);
+    }
+} // PackIndexTests
 
 namespace PackIsUniqueTests {
     STEST(PackIsUnique) {
