@@ -7,17 +7,35 @@
 namespace Stealth::Engine {
     template <typename... ComponentTypes>
     class Archetype {
-    private:
-        std::tuple<std::vector<ComponentTypes>...> mComponents;
     public:
+        template <typename ComponentType>
+        using StorageType = std::vector<ComponentType>;
+    protected:
+        std::tuple<StorageType<ComponentTypes>...> mComponents;
+        size_t mSize{0}; // The number of entities in this Archetype.
+    public:
+
         // When an Archetype is constructed, it will check whether it contains duplicate component types
         constexpr Archetype() {
             static_assert(packIsUnique<ComponentTypes...>(), "Archetype cannot contain duplicate component types");
         }
 
+        constexpr size_t size() const {
+            return mSize;
+        }
+
         template <typename T>
         static constexpr bool contains() {
             return packContains<T, ComponentTypes...>();
+        }
+
+        // Adds the provided components to mComponents and returns the index of the newly added components.
+        template <typename... Args>
+        size_t addComponents(Args&&... components) {
+            static_assert(packsAreEquivalent(std::tuple<removeCVRef<Args>...>{}, std::tuple<ComponentTypes...>{}), "Component types do not match the types of this Archetype");
+            // Add each component to the appropriate vector.
+            (std::get<StorageType<removeCVRef<Args>>>(mComponents).emplace_back(std::forward<Args&&>(components)), ...);
+            return mSize++;
         }
     };
 } // Stealth::Engine
