@@ -10,7 +10,7 @@ namespace Stealth::Engine {
     template <typename... Archetypes>
     class World {
     private:
-        std::tuple<ArchetypeGroup<typename Archetypes::GroupType>...> mGroups{};
+        std::tuple<Archetypes...> mArchetypes{};
     public:
         World() {
             static_assert(packIsUnique<Archetypes...>(), "World cannot contain duplicate archetypes");

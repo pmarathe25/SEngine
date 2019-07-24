@@ -1,7 +1,7 @@
 #include "archetype.hpp"
 #include <Stealth/STest.hpp>
 
-using Stealth::Engine::ArchetypeGroup, Stealth::Engine::Archetype;
+using Stealth::Engine::Archetype;
 
 STEST(IdenticalArchetypesAreSame) {
     EXPECT_TRUE((std::is_same_v<Archetype<int32_t, float>, Archetype<int32_t, float>>));
@@ -17,17 +17,17 @@ STEST(DifferentArchetypesAreDifferent) {
 
 STEST(ArchetypeContainsCorrectElements) {
     using IFDC = Archetype<int32_t, float, double, char>;
-    EXPECT_TRUE(IFDC::contains<int32_t>);
-    EXPECT_TRUE(IFDC::contains<float>);
-    EXPECT_TRUE(IFDC::contains<double>);
-    EXPECT_TRUE(IFDC::contains<char>);
+    EXPECT_TRUE(IFDC::contains<int32_t>());
+    EXPECT_TRUE(IFDC::contains<float>());
+    EXPECT_TRUE(IFDC::contains<double>());
+    EXPECT_TRUE(IFDC::contains<char>());
 }
 
-class IntFloatGroupFixture {
+class IntFloatFixture {
 protected:
-    ArchetypeGroup<int, float> mGroup{};
+    Archetype<int, float> archetype{};
 };
 
-STEST_F(IntFloatGroupFixture, CanConstruct) { }
+STEST_F(IntFloatFixture, CanConstruct) { }
 
 STEST_MAIN();
