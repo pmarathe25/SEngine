@@ -2,10 +2,11 @@
 #define VARIADIC_HELPERS_HPP
 #include <type_traits>
 
-// TODO: Need a way to find a type in a tuple.
-
-// Forward Declarations
+// All comparisons rely on std::is_same, and will therefore respect any specializations of that metafunction.
 namespace Stealth::Engine {
+    template <typename T>
+    using removeCVRef = std::remove_cv_t<std::remove_reference_t<T>>;
+
     // Determines whether a parameter pack, Args, contains the specified type, Elem.
     template <typename Elem, typename... Args>
     constexpr bool packContains() noexcept;

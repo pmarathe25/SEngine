@@ -1,7 +1,16 @@
 #include "meta/functions.hpp"
 #include <Stealth/STest.hpp>
 
-using Stealth::Engine::packContains, Stealth::Engine::packIsUnique, Stealth::Engine::packIsSubset, Stealth::Engine::packsAreEquivalent, Stealth::Engine::packIndex;
+using Stealth::Engine::packContains, Stealth::Engine::packIsUnique, Stealth::Engine::packIsSubset, Stealth::Engine::packsAreEquivalent, Stealth::Engine::packIndex, Stealth::Engine::removeCVRef;
+
+STEST(RemoveCVRefWorks) {
+    EXPECT_TRUE((std::is_same_v<removeCVRef<const int32_t&&>, int32_t>));
+    EXPECT_TRUE((std::is_same_v<removeCVRef<const int32_t&>, int32_t>));
+    EXPECT_TRUE((std::is_same_v<removeCVRef<const int32_t>, int32_t>));
+    EXPECT_TRUE((std::is_same_v<removeCVRef<int32_t&&>, int32_t>));
+    EXPECT_TRUE((std::is_same_v<removeCVRef<int32_t&>, int32_t>));
+    EXPECT_TRUE((std::is_same_v<removeCVRef<int32_t>, int32_t>));
+}
 
 namespace PackContainsTests {
     STEST(PackDoesContainType) {
