@@ -1,6 +1,6 @@
 #ifndef ARCHETYPE_HPP
 #define ARCHETYPE_HPP
-#include "meta/functions.hpp"
+#include "meta/packs.hpp"
 #include <tuple>
 #include <vector>
 
@@ -31,7 +31,7 @@ namespace Stealth::Engine {
         // Adds the provided components to mComponents and returns the index of the newly added components.
         template <typename... Args>
         size_t addComponents(Args&&... components) {
-            static_assert(packsAreEquivalent<removeCVRef<Args>...>(std::tuple<ComponentTypes...>{}), "Component types do not match the types of this Archetype");
+            static_assert(packsAreEquivalent(ParameterPack<removeCVRef<Args>...>{}, ParameterPack<ComponentTypes...>{}), "Component types do not match the types of this Archetype");
             // Add each component to the appropriate vector.
             (std::get<StorageType<removeCVRef<Args>>>(mComponents).emplace_back(std::forward<Args&&>(components)), ...);
             return mSize++;
@@ -60,7 +60,7 @@ namespace std {
     // different between archetypes.
     template <typename... Args1, typename... Args2>
     struct is_same<Stealth::Engine::Archetype<Args1...>, Stealth::Engine::Archetype<Args2...>> {
-        static constexpr bool value = Stealth::Engine::packsAreEquivalent<Args1...>(std::tuple<Args2...>{});
+        static constexpr bool value = Stealth::Engine::packsAreEquivalent(Stealth::Engine::ParameterPack<Args1...>{}, Stealth::Engine::ParameterPack<Args2...>{});
     };
 
     // To disambiguate from std::is_same<_Tp, _Tp> specialization.

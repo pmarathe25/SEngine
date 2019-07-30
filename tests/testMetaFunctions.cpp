@@ -1,7 +1,7 @@
-#include "meta/functions.hpp"
+#include "meta/packs.hpp"
 #include <Stealth/STest.hpp>
 
-using Stealth::Engine::packContains, Stealth::Engine::packIsUnique, Stealth::Engine::packIsSubset, Stealth::Engine::packsAreEquivalent, Stealth::Engine::packIndex, Stealth::Engine::removeCVRef, Stealth::Engine::reorderTuple;
+using Stealth::Engine::packContains, Stealth::Engine::packIsUnique, Stealth::Engine::packIsSubset, Stealth::Engine::packsAreEquivalent, Stealth::Engine::packIndex, Stealth::Engine::removeCVRef, Stealth::Engine::reorderTuple, Stealth::Engine::ParameterPack;
 
 STEST(RemoveCVRefWorks) {
     EXPECT_TRUE((std::is_same_v<removeCVRef<const int32_t&&>, int32_t>));
@@ -60,33 +60,33 @@ namespace PackIsUniqueTests {
 
 namespace PackIsSubsetTests {
     STEST(PackIsSubset) {
-        EXPECT_TRUE((packIsSubset<int32_t, float, double>(std::tuple<int32_t, float, double, char, uint8_t>{})));
+        EXPECT_TRUE((packIsSubset(ParameterPack<int32_t, float, double>{}, ParameterPack<int32_t, float, double, char, uint8_t>{})));
     }
 
     STEST(PackIsNotSubset) {
-        EXPECT_FALSE((packIsSubset<int32_t, float, double>(std::tuple<int32_t, float, char, uint8_t>{})));
+        EXPECT_FALSE((packIsSubset(ParameterPack<int32_t, float, double>{}, ParameterPack<int32_t, float, char, uint8_t>{})));
     }
 
     STEST(EmptyPackIsSubset) {
-        EXPECT_TRUE((packIsSubset<>(std::tuple<int32_t, float, char, uint8_t>{})));
+        EXPECT_TRUE((packIsSubset({}, ParameterPack<int32_t, float, char, uint8_t>{})));
     }
 } // PackIsSubsetTests
 
 namespace PacksAreEquivalentTests {
     STEST(PacksAreEquivalent) {
-        EXPECT_TRUE((packsAreEquivalent<int32_t, float, double>(std::tuple<float, double, int32_t>{})));
+        EXPECT_TRUE((packsAreEquivalent(ParameterPack<int32_t, float, double>{}, ParameterPack<float, double, int32_t>{})));
     }
 
     STEST(PacksAreNotEquivalentElementsDifferent) {
-        EXPECT_FALSE((packsAreEquivalent<int32_t, uint8_t, double>(std::tuple<float, double, int32_t>{})));
+        EXPECT_FALSE((packsAreEquivalent(ParameterPack<int32_t, uint8_t, double>{}, ParameterPack<float, double, int32_t>{})));
     }
 
     STEST(PacksAreNotEquivalentLengthDifferent) {
-        EXPECT_FALSE((packsAreEquivalent<int32_t, char, float, double>(std::tuple<float, double, int32_t>{})));
+        EXPECT_FALSE((packsAreEquivalent(ParameterPack<int32_t, char, float, double>{}, ParameterPack<float, double, int32_t>{})));
     }
 
     STEST(EmptyPacksAreEquivalent) {
-        EXPECT_TRUE((packsAreEquivalent<>(std::tuple{})));
+        EXPECT_TRUE((packsAreEquivalent({}, ParameterPack{})));
     }
 } // PacksAreEquivalentTests
 
