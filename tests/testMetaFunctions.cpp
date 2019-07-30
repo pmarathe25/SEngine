@@ -1,7 +1,7 @@
 #include "meta/functions.hpp"
 #include <Stealth/STest.hpp>
 
-using Stealth::Engine::packContains, Stealth::Engine::packIsUnique, Stealth::Engine::packIsSubset, Stealth::Engine::packsAreEquivalent, Stealth::Engine::packIndex, Stealth::Engine::removeCVRef;
+using Stealth::Engine::packContains, Stealth::Engine::packIsUnique, Stealth::Engine::packIsSubset, Stealth::Engine::packsAreEquivalent, Stealth::Engine::packIndex, Stealth::Engine::removeCVRef, Stealth::Engine::reorderPack;
 
 STEST(RemoveCVRefWorks) {
     EXPECT_TRUE((std::is_same_v<removeCVRef<const int32_t&&>, int32_t>));
@@ -89,5 +89,15 @@ namespace PacksAreEquivalentTests {
         EXPECT_TRUE((packsAreEquivalent(std::tuple{}, std::tuple{})));
     }
 } // PacksAreEquivalentTests
+
+namespace reorderPackTests {
+    STEST(CanReorderSimplePack) {
+        std::tuple<int32_t, float, char> inp{51, 0.5f, 'h'};
+        const auto out = reorderPack<char, float, int32_t>(inp);
+        EXPECT_EQ(std::get<0>(out), std::get<2>(inp));
+        EXPECT_EQ(std::get<1>(out), std::get<1>(inp));
+        EXPECT_EQ(std::get<2>(out), std::get<0>(inp));
+    }
+} // reorderPackTests
 
 STEST_MAIN();

@@ -1,6 +1,7 @@
 #ifndef VARIADIC_HELPERS_HPP
 #define VARIADIC_HELPERS_HPP
 #include <type_traits>
+#include <tuple>
 
 // All comparisons rely on std::is_same, and will therefore respect any specializations of that metafunction.
 namespace Stealth::Engine {
@@ -27,6 +28,9 @@ namespace Stealth::Engine {
     // Determines whether two packs contain the same types, regardless of order.
     template <typename... Args1, typename... Args2>
     constexpr bool packsAreEquivalent(const std::tuple<Args1...>& lhs, const std::tuple<Args2...>& rhs) noexcept;
+
+    template <typename... To, typename... From>
+    constexpr std::tuple<To...> reorderPack(std::tuple<From...> fromPack);
 } // Stealth::Engine
 
 namespace Stealth::Engine {
@@ -94,6 +98,15 @@ namespace Stealth::Engine {
         } else {
             return packIsSubset(lhs, rhs);
         }
+    }
+
+    template <typename... To, typename... From>
+    constexpr std::tuple<To...> reorderPack(std::tuple<From...> fromPack) {
+        std::tuple<To...> toPack{};
+        static_assert(packsAreEquivalent(toPack, fromPack), "New pack must contain the same types as the old pack");
+        // Move all elements from the old tuple to the new one.
+        ((std::get<From>(toPack) = std::move(std::get<From>(fromPack))), ...);
+        return toPack;
     }
 
 } // Stealth::Engine
