@@ -31,7 +31,7 @@ namespace Stealth::Engine {
         // Adds the provided components to mComponents and returns the index of the newly added components.
         template <typename... Args>
         size_t addComponents(Args&&... components) {
-            static_assert(packsAreEquivalent(std::tuple<removeCVRef<Args>...>{}, std::tuple<ComponentTypes...>{}), "Component types do not match the types of this Archetype");
+            static_assert(packsAreEquivalent<removeCVRef<Args>...>(std::tuple<ComponentTypes...>{}), "Component types do not match the types of this Archetype");
             // Add each component to the appropriate vector.
             (std::get<StorageType<removeCVRef<Args>>>(mComponents).emplace_back(std::forward<Args&&>(components)), ...);
             return mSize++;
@@ -42,6 +42,15 @@ namespace Stealth::Engine {
             static_assert(Archetype::containsType<ComponentType>(), "Cannot retrieve component type - this type is not present in the archetype");
             return std::get<StorageType<ComponentType>>(mComponents);
         }
+
+        template <typename... OutputOrderTypes>
+        constexpr std::tuple<const OutputOrderTypes&...> at(size_t index) const {
+            return reorderTuple<const OutputOrderTypes&...>(std::tuple<const ComponentTypes&...>{this->storage<ComponentTypes>().at(index)...});
+        }
+
+        constexpr std::tuple<const ComponentTypes&...> at(size_t index) const {
+            return this->at<ComponentTypes...>(index);
+        }
     };
 } // Stealth::Engine
 
@@ -51,7 +60,7 @@ namespace std {
     // different between archetypes.
     template <typename... Args1, typename... Args2>
     struct is_same<Stealth::Engine::Archetype<Args1...>, Stealth::Engine::Archetype<Args2...>> {
-        static constexpr bool value = Stealth::Engine::packsAreEquivalent(std::tuple<Args1...>{}, std::tuple<Args2...>{});
+        static constexpr bool value = Stealth::Engine::packsAreEquivalent<Args1...>(std::tuple<Args2...>{});
     };
 
     // To disambiguate from std::is_same<_Tp, _Tp> specialization.

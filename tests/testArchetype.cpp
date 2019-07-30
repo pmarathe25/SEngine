@@ -38,26 +38,41 @@ STEST_F(IntFloatFixture, CanGetVectors) {
     EXPECT_EQ(archetype.storage<int32_t>().size(), 0);
 }
 
-// Internal tests
-STEST_F(ArchetypeInternalFixture, CanAddComponentsInOrder) {
-    constexpr int32_t i = 10;
-    constexpr float f = 0.125f;
-    this->addComponents(i, f);
-    EXPECT_EQ(intStorage.size(), 1);
-    EXPECT_EQ(intStorage.at(0), i);
-    EXPECT_EQ(floatStorage.size(), 1);
-    EXPECT_EQ(floatStorage.at(0), f);
-}
+namespace InternalTests {
+    STEST_F(ArchetypeInternalFixture, CanAddComponentsInOrder) {
+        constexpr int32_t i = 10;
+        constexpr float f = 0.125f;
+        this->addComponents(i, f);
+        EXPECT_EQ(intStorage.size(), 1);
+        EXPECT_EQ(intStorage.at(0), i);
+        EXPECT_EQ(floatStorage.size(), 1);
+        EXPECT_EQ(floatStorage.at(0), f);
+    }
 
-STEST_F(ArchetypeInternalFixture, CanAddComponentsOutOfOrder) {
-    constexpr int32_t i = 10;
-    constexpr float f = 0.125f;
-    this->addComponents(f, i);
-    EXPECT_EQ(intStorage.size(), 1);
-    EXPECT_EQ(intStorage.at(0), i);
-    EXPECT_EQ(floatStorage.size(), 1);
-    EXPECT_EQ(floatStorage.at(0), f);
-}
+    STEST_F(ArchetypeInternalFixture, CanAddComponentsOutOfOrder) {
+        constexpr int32_t i = 10;
+        constexpr float f = 0.125f;
+        this->addComponents(f, i);
+        EXPECT_EQ(intStorage.size(), 1);
+        EXPECT_EQ(intStorage.at(0), i);
+        EXPECT_EQ(floatStorage.size(), 1);
+        EXPECT_EQ(floatStorage.at(0), f);
+    }
+} // InternalTests
 
+class PopulatedIFFixture {
+public:
+    PopulatedIFFixture() {
+        archetype.addComponents(0.f, 1);
+        archetype.addComponents(67, 1.f);
+        archetype.addComponents(0, 3.14f);
+    }
+protected:
+    common::IFArchetype archetype{};
+};
+
+STEST_F(PopulatedIFFixture, CanGetTupleOfReferencesToComponents) {
+    const auto iftuple = archetype.at(0);
+}
 
 STEST_MAIN();

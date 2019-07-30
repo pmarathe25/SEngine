@@ -23,14 +23,14 @@ namespace Stealth::Engine {
     // TODO: Pass tuple as template argument.
     // Determines whether the left-hand side pack is a subset of the right-hand side pack.
     template <typename... Args1, typename... Args2>
-    constexpr bool packIsSubset(const std::tuple<Args1...>& lhs, const std::tuple<Args2...>& rhs) noexcept;
+    constexpr bool packIsSubset(const std::tuple<Args2...>& rhs) noexcept;
 
     // Determines whether two packs contain the same types, regardless of order.
     template <typename... Args1, typename... Args2>
-    constexpr bool packsAreEquivalent(const std::tuple<Args1...>& lhs, const std::tuple<Args2...>& rhs) noexcept;
+    constexpr bool packsAreEquivalent(const std::tuple<Args2...>& rhs) noexcept;
 
     template <typename... To, typename... From>
-    constexpr std::tuple<To...> reorderPack(std::tuple<From...> fromPack);
+    constexpr std::tuple<To...> reorderTuple(std::tuple<From...> fromPack);
 } // Stealth::Engine
 
 namespace Stealth::Engine {
@@ -74,39 +74,40 @@ namespace Stealth::Engine {
 
     // Loops over LHS and checks whether each type is present in the RHS
     template <typename T1, typename... Args1, typename... Args2>
-    constexpr bool packIsSubsetImpl(const std::tuple<T1, Args1...>& lhs, const std::tuple<Args2...>& rhs) noexcept {
-        return packContains<T1, Args2...>() && packIsSubset(std::tuple<Args1...>{}, rhs);
+    constexpr bool packIsSubsetImpl(const std::tuple<Args2...>& rhs) noexcept {
+        return packContains<T1, Args2...>() && packIsSubset<Args1...>(rhs);
     }
 
     template <typename... Args1, typename... Args2>
-    constexpr bool packIsSubset(const std::tuple<Args1...>& lhs, const std::tuple<Args2...>& rhs) noexcept {
+    constexpr bool packIsSubset(const std::tuple<Args2...>& rhs) noexcept {
         if constexpr (sizeof...(Args1) == 0) {
             return true;
         } else {
-            return packIsSubsetImpl(lhs, rhs);
+            return packIsSubsetImpl<Args1...>(rhs);
         }
     }
 
 
     template <typename... Args1, typename... Args2>
-    constexpr bool packsAreEquivalent(const std::tuple<Args1...>& lhs, const std::tuple<Args2...>& rhs) noexcept {
+    constexpr bool packsAreEquivalent(const std::tuple<Args2...>& rhs) noexcept {
         static_assert(packIsUnique<Args1...>() && packIsUnique<Args2...>(), "Cannot compare non-unique packs for equivalency!");
         if constexpr (sizeof...(Args1) != sizeof...(Args2)) {
             return false;
         } else if constexpr (sizeof...(Args1) <= 1 || sizeof...(Args2) <= 1) {
             return true;
         } else {
-            return packIsSubset(lhs, rhs);
+            return packIsSubset<Args1...>(rhs);
         }
     }
 
     template <typename... To, typename... From>
-    constexpr std::tuple<To...> reorderPack(std::tuple<From...> fromPack) {
-        std::tuple<To...> toPack{};
-        static_assert(packsAreEquivalent(toPack, fromPack), "New pack must contain the same types as the old pack");
+    constexpr std::tuple<To...> reorderTuple(std::tuple<From...> fromPack) {
+        // std::tuple<To...> toPack{};
+        static_assert(packsAreEquivalent<To...>(fromPack), "New pack must contain the same types as the old pack");
         // Move all elements from the old tuple to the new one.
-        ((std::get<From>(toPack) = std::move(std::get<From>(fromPack))), ...);
-        return toPack;
+        // ((std::get<From>(toPack) = std::move(std::get<From>(fromPack))), ...);
+        // return toPack;
+        return std::tuple<To...>{std::get<To>(fromPack)...};
     }
 
 } // Stealth::Engine

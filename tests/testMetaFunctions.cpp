@@ -1,7 +1,7 @@
 #include "meta/functions.hpp"
 #include <Stealth/STest.hpp>
 
-using Stealth::Engine::packContains, Stealth::Engine::packIsUnique, Stealth::Engine::packIsSubset, Stealth::Engine::packsAreEquivalent, Stealth::Engine::packIndex, Stealth::Engine::removeCVRef, Stealth::Engine::reorderPack;
+using Stealth::Engine::packContains, Stealth::Engine::packIsUnique, Stealth::Engine::packIsSubset, Stealth::Engine::packsAreEquivalent, Stealth::Engine::packIndex, Stealth::Engine::removeCVRef, Stealth::Engine::reorderTuple;
 
 STEST(RemoveCVRefWorks) {
     EXPECT_TRUE((std::is_same_v<removeCVRef<const int32_t&&>, int32_t>));
@@ -60,44 +60,44 @@ namespace PackIsUniqueTests {
 
 namespace PackIsSubsetTests {
     STEST(PackIsSubset) {
-        EXPECT_TRUE((packIsSubset(std::tuple<int32_t, float, double>{}, std::tuple<int32_t, float, double, char, uint8_t>{})))
+        EXPECT_TRUE((packIsSubset<int32_t, float, double>(std::tuple<int32_t, float, double, char, uint8_t>{})));
     }
 
     STEST(PackIsNotSubset) {
-        EXPECT_FALSE((packIsSubset(std::tuple<int32_t, float, double>{}, std::tuple<int32_t, float, char, uint8_t>{})))
+        EXPECT_FALSE((packIsSubset<int32_t, float, double>(std::tuple<int32_t, float, char, uint8_t>{})));
     }
 
     STEST(EmptyPackIsSubset) {
-        EXPECT_TRUE((packIsSubset(std::tuple{}, std::tuple<int32_t, float, char, uint8_t>{})))
+        EXPECT_TRUE((packIsSubset<>(std::tuple<int32_t, float, char, uint8_t>{})));
     }
 } // PackIsSubsetTests
 
 namespace PacksAreEquivalentTests {
     STEST(PacksAreEquivalent) {
-        EXPECT_TRUE((packsAreEquivalent(std::tuple<int32_t, float, double>{}, std::tuple<float, double, int32_t>{})));
+        EXPECT_TRUE((packsAreEquivalent<int32_t, float, double>(std::tuple<float, double, int32_t>{})));
     }
 
     STEST(PacksAreNotEquivalentElementsDifferent) {
-        EXPECT_FALSE((packsAreEquivalent(std::tuple<int32_t, uint8_t, double>{}, std::tuple<float, double, int32_t>{})));
+        EXPECT_FALSE((packsAreEquivalent<int32_t, uint8_t, double>(std::tuple<float, double, int32_t>{})));
     }
 
     STEST(PacksAreNotEquivalentLengthDifferent) {
-        EXPECT_FALSE((packsAreEquivalent(std::tuple<int32_t, char, float, double>{}, std::tuple<float, double, int32_t>{})));
+        EXPECT_FALSE((packsAreEquivalent<int32_t, char, float, double>(std::tuple<float, double, int32_t>{})));
     }
 
     STEST(EmptyPacksAreEquivalent) {
-        EXPECT_TRUE((packsAreEquivalent(std::tuple{}, std::tuple{})));
+        EXPECT_TRUE((packsAreEquivalent<>(std::tuple{})));
     }
 } // PacksAreEquivalentTests
 
-namespace reorderPackTests {
+namespace reorderTupleTests {
     STEST(CanReorderSimplePack) {
         std::tuple<int32_t, float, char> inp{51, 0.5f, 'h'};
-        const auto out = reorderPack<char, float, int32_t>(inp);
+        const auto out = reorderTuple<char, float, int32_t>(inp);
         EXPECT_EQ(std::get<0>(out), std::get<2>(inp));
         EXPECT_EQ(std::get<1>(out), std::get<1>(inp));
         EXPECT_EQ(std::get<2>(out), std::get<0>(inp));
     }
-} // reorderPackTests
+} // reorderTupleTests
 
 STEST_MAIN();
