@@ -102,12 +102,9 @@ namespace Stealth::Engine {
 
     template <typename... To, typename... From>
     constexpr std::tuple<To...> reorderTuple(std::tuple<From...> fromPack) {
-        // std::tuple<To...> toPack{};
         static_assert(packsAreEquivalent<To...>(fromPack), "New pack must contain the same types as the old pack");
         // Move all elements from the old tuple to the new one.
-        // ((std::get<From>(toPack) = std::move(std::get<From>(fromPack))), ...);
-        // return toPack;
-        return std::tuple<To...>{std::get<To>(fromPack)...};
+        return std::tuple<To...>{std::move(std::get<To>(fromPack))...};
     }
 
 } // Stealth::Engine
