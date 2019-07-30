@@ -63,6 +63,7 @@ namespace InternalTests {
 class PopulatedIFFixture {
 public:
     PopulatedIFFixture() {
+        // These will be reordered to (int32_t, float)
         archetype.addComponents(0.f, 1);
         archetype.addComponents(67, 1.f);
         archetype.addComponents(0, 3.14f);
@@ -73,6 +74,14 @@ protected:
 
 STEST_F(PopulatedIFFixture, CanGetTupleOfReferencesToComponents) {
     const auto iftuple = archetype.at(0);
+    EXPECT_EQ(std::get<0>(iftuple), 1);
+    EXPECT_EQ(std::get<1>(iftuple), 0.f);
+}
+
+STEST_F(PopulatedIFFixture, CanGetReorderedTupleOfReferencesToComponents) {
+    const auto fituple = archetype.at<float, int32_t>(1);
+    EXPECT_EQ(std::get<0>(fituple), 1.f);
+    EXPECT_EQ(std::get<1>(fituple), 67);
 }
 
 STEST_MAIN();
