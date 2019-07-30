@@ -4,6 +4,7 @@
 
 using Stealth::Engine::Archetype;
 using common::ArchetypeInternalFixture;
+using Stealth::Engine::removeCVRef;
 
 STEST(IdenticalArchetypesAreSame) {
     EXPECT_TRUE((std::is_same_v<Archetype<int32_t, float>, Archetype<int32_t, float>>));
@@ -32,8 +33,14 @@ protected:
 
 STEST_F(IntFloatFixture, CanConstruct) { }
 
+STEST_F(IntFloatFixture, CanGetVectors) {
+    EXPECT_TRUE((std::is_same_v<removeCVRef<decltype(archetype.storage<int32_t>())>, common::IFArchetype::StorageType<int32_t>>));
+    EXPECT_EQ(archetype.storage<int32_t>().size(), 0);
+}
+
+// Internal tests
 STEST_F(ArchetypeInternalFixture, CanAddComponentsInOrder) {
-    constexpr int i = 10;
+    constexpr int32_t i = 10;
     constexpr float f = 0.125f;
     this->addComponents(i, f);
     EXPECT_EQ(intStorage.size(), 1);
@@ -43,7 +50,7 @@ STEST_F(ArchetypeInternalFixture, CanAddComponentsInOrder) {
 }
 
 STEST_F(ArchetypeInternalFixture, CanAddComponentsOutOfOrder) {
-    constexpr int i = 10;
+    constexpr int32_t i = 10;
     constexpr float f = 0.125f;
     this->addComponents(f, i);
     EXPECT_EQ(intStorage.size(), 1);

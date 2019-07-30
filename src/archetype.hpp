@@ -36,6 +36,12 @@ namespace Stealth::Engine {
             (std::get<StorageType<removeCVRef<Args>>>(mComponents).emplace_back(std::forward<Args&&>(components)), ...);
             return mSize++;
         }
+
+        template <typename ComponentType>
+        constexpr const StorageType<ComponentType>& storage() const {
+            static_assert(Archetype::containsType<ComponentType>(), "Cannot retrieve component type - this type is not present in the archetype");
+            return std::get<StorageType<ComponentType>>(mComponents);
+        }
     };
 } // Stealth::Engine
 
