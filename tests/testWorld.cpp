@@ -1,5 +1,6 @@
 #include "archetype.hpp"
 #include "world.hpp"
+#include "common.hpp"
 #include <Stealth/STest.hpp>
 
 using Stealth::Engine::Archetype, Stealth::Engine::World;

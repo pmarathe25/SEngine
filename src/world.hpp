@@ -11,7 +11,7 @@ namespace Stealth::Engine {
     class World {
     protected:
         std::tuple<Archetypes...> mArchetypes{};
-        size_t lastID{0};
+        Entity mLastEntity{0};
     public:
         World() {
             static_assert(packIsUnique<Archetypes...>(), "World cannot contain duplicate archetypes");
@@ -26,7 +26,7 @@ namespace Stealth::Engine {
             auto& archetype = std::get<Index>(mArchetypes);
             // Add entity to appropriate archetype.
             archetype.addComponents(std::forward<ComponentTypes&&>(components)...);
-            return lastID++;
+            return mLastEntity++;
         }
     };
 } // Stealth::Engine

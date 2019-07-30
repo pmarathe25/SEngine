@@ -14,19 +14,18 @@ namespace Stealth::Engine {
         std::tuple<StorageType<ComponentTypes>...> mComponents;
         size_t mSize{0}; // The number of entities in this Archetype.
     public:
-
         // When an Archetype is constructed, it will check whether it contains duplicate component types
         constexpr Archetype() {
             static_assert(packIsUnique<ComponentTypes...>(), "Archetype cannot contain duplicate component types");
         }
 
-        constexpr size_t size() const {
-            return mSize;
+        template <typename T>
+        static constexpr bool containsType() noexcept {
+            return packContains<T, ComponentTypes...>();
         }
 
-        template <typename T>
-        static constexpr bool contains() {
-            return packContains<T, ComponentTypes...>();
+        constexpr size_t size() const {
+            return mSize;
         }
 
         // Adds the provided components to mComponents and returns the index of the newly added components.

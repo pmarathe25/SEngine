@@ -19,6 +19,7 @@ namespace Stealth::Engine {
     template <typename... Args>
     constexpr bool packIsUnique() noexcept;
 
+    // TODO: Pass tuple as template argument.
     // Determines whether the left-hand side pack is a subset of the right-hand side pack.
     template <typename... Args1, typename... Args2>
     constexpr bool packIsSubset(const std::tuple<Args1...>& lhs, const std::tuple<Args2...>& rhs) noexcept;
