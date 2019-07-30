@@ -1,6 +1,7 @@
 #ifndef ARCHETYPE_HPP
 #define ARCHETYPE_HPP
 #include "meta/packs.hpp"
+#include "meta/tuples.hpp"
 #include <tuple>
 #include <vector>
 
@@ -43,9 +44,12 @@ namespace Stealth::Engine {
             return std::get<StorageType<ComponentType>>(mComponents);
         }
 
-        template <typename... OutputOrderTypes>
-        constexpr std::tuple<const OutputOrderTypes&...> at(size_t index) const {
-            return reorderTuple<const OutputOrderTypes&...>(std::tuple<const ComponentTypes&...>{this->storage<ComponentTypes>().at(index)...});
+        // Returns a tuple of references to components in this archetype.
+        // Types and ordering can be specified, but defaults to the types and ordering of the Archetype.
+        // This function can also be used to select a subset of the component types.
+        template <typename... SelectedComponents>
+        constexpr std::tuple<const SelectedComponents&...> at(size_t index) const {
+            return tupleSelect<const SelectedComponents&...>(std::tuple<const ComponentTypes&...>{this->storage<ComponentTypes>().at(index)...});
         }
 
         constexpr std::tuple<const ComponentTypes&...> at(size_t index) const {
