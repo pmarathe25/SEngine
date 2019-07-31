@@ -1,6 +1,7 @@
 #ifndef META_PACKS_HPP
 #define META_PACKS_HPP
 #include <type_traits>
+#include <cstddef>
 
 // All comparisons rely on std::is_same, and will therefore respect any specializations of that metafunction.
 namespace Stealth::Engine {
@@ -19,7 +20,7 @@ namespace Stealth::Engine {
 
         // Returns the index of the specified type in this pack.
         template <typename Elem>
-        static constexpr std::size_t index() noexcept {
+        static constexpr size_t index() noexcept {
             static_assert(contains<Elem>(), "Cannot find index of type, because pack does not contain this type");
             return indexImpl<Elem, 0, Parameters...>();
         }
@@ -48,7 +49,7 @@ namespace Stealth::Engine {
         }
 
         template <typename Elem, int Index, typename First, typename... Rest>
-        static constexpr std::size_t indexImpl() noexcept {
+        static constexpr size_t indexImpl() noexcept {
             if constexpr (std::is_same_v<Elem, First>) {
                 return Index;
             } else {

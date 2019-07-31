@@ -81,4 +81,9 @@ STEST_F(PopulatedIFFixture, CanGetReorderedTupleOfReferencesToComponents) {
     EXPECT_EQ(std::get<1>(fituple), 67);
 }
 
+STEST_F(PopulatedIFFixture, CanGetTupleOfSelectedReferencesToComponents) {
+    const auto fituple = archetype.at<float>(1);
+    EXPECT_EQ(std::get<0>(fituple), 1.f);
+}
+
 STEST_MAIN();

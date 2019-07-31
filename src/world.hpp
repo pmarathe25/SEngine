@@ -1,12 +1,11 @@
 #ifndef WORLD_HPP
 #define WORLD_HPP
+#include "entity.hpp"
 #include "archetype.hpp"
 #include "meta/packs.hpp"
 #include <tuple>
 
 namespace Stealth::Engine {
-    using Entity = size_t;
-
     // The world manages all entity creation, destruction and modification (adding/removing components)
     template <typename... Archetypes>
     class World {
