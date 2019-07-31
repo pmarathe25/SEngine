@@ -20,10 +20,7 @@ STEST(DifferentArchetypesAreDifferent) {
 
 STEST(ArchetypeContainsCorrectElements) {
     using IFDC = Archetype<int32_t, float, double, char>;
-    EXPECT_TRUE(IFDC::containsType<int32_t>());
-    EXPECT_TRUE(IFDC::containsType<float>());
-    EXPECT_TRUE(IFDC::containsType<double>());
-    EXPECT_TRUE(IFDC::containsType<char>());
+    EXPECT_TRUE((IFDC::ComponentPack::contains<char, double, float, int32_t>()));
 }
 
 class IntFloatFixture {

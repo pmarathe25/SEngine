@@ -1,7 +1,7 @@
 #include "meta/packs.hpp"
 #include <Stealth/STest.hpp>
 
-using Stealth::Engine::packContains, Stealth::Engine::packIsUnique, Stealth::Engine::packIsSubset, Stealth::Engine::packsAreEquivalent, Stealth::Engine::packIndex, Stealth::Engine::removeCVRef, Stealth::Engine::ParameterPack;
+using Stealth::Engine::removeCVRef, Stealth::Engine::ParameterPack;
 
 STEST(RemoveCVRefWorks) {
     EXPECT_TRUE((std::is_same_v<removeCVRef<const int32_t&&>, int32_t>));
@@ -14,79 +14,79 @@ STEST(RemoveCVRefWorks) {
 
 namespace PackContainsTests {
     STEST(PackDoesContainType) {
-        EXPECT_TRUE((packContains<int32_t, int32_t, float, double>()));
-        EXPECT_TRUE((packContains<int32_t, char, uint8_t, int32_t, float, double>()));
+        EXPECT_TRUE((ParameterPack<int32_t, float, double>::contains<int32_t>()));
+        EXPECT_TRUE((ParameterPack<char, uint8_t, int32_t, float, double>::contains<int32_t>()));
     }
 
     STEST(PackDoesNotContainType) {
-        EXPECT_FALSE((packContains<uint8_t, int32_t, float, double>()));
+        EXPECT_FALSE((ParameterPack<int32_t, float, double>::contains<uint8_t>()));
     }
 
     STEST(EmptyPackIsAlwaysFalse) {
-        EXPECT_FALSE((packContains<uint8_t>()));
+        EXPECT_FALSE((ParameterPack<>::contains<uint8_t>()));
     }
 } // PackContainsTests
 
 namespace PackIndexTests {
     STEST(PackIndexCorrect) {
-        EXPECT_EQ((packIndex<int32_t, float, char, double, uint8_t, int32_t>()), 4);
-        EXPECT_EQ((packIndex<int32_t, int32_t, float, char, double, uint8_t>()), 0);
+        EXPECT_EQ((ParameterPack<float, char, double, uint8_t, int32_t>::index<int32_t>()), 4);
+        EXPECT_EQ((ParameterPack<int32_t, float, char, double, uint8_t>::index<int32_t>()), 0);
     }
 
     STEST(PackIndexInDuplicateReturnsFirstIndex) {
-        EXPECT_EQ((packIndex<int32_t, float, char, int32_t, double, uint8_t, int32_t>()), 2);
-        EXPECT_EQ((packIndex<char, float, double, int32_t, char, char, double, uint8_t, int32_t>()), 3);
+        EXPECT_EQ((ParameterPack<float, char, int32_t, double, uint8_t, int32_t>::index<int32_t>()), 2);
+        EXPECT_EQ((ParameterPack<float, double, int32_t, char, char, double, uint8_t, int32_t>::index<char>()), 3);
     }
 } // PackIndexTests
 
 namespace PackIsUniqueTests {
     STEST(PackIsUnique) {
-        EXPECT_TRUE((packIsUnique<int32_t, float, double>()));
+        EXPECT_TRUE((ParameterPack<int32_t, float, double>::isUnique()));
     }
 
     STEST(PackIsNotUnique) {
-        EXPECT_FALSE((packIsUnique<float, float, double>()));
-        EXPECT_FALSE((packIsUnique<int32_t, char, float, float, double>()));
+        EXPECT_FALSE((ParameterPack<float, float, double>::isUnique()));
+        EXPECT_FALSE((ParameterPack<int32_t, char, float, float, double>::isUnique()));
     }
 
     STEST(PackContainsOneElement) {
-        EXPECT_TRUE((packIsUnique<double>()));
+        EXPECT_TRUE((ParameterPack<double>::isUnique()));
     }
 
     STEST(PackContainsZeroElements) {
-        EXPECT_TRUE((packIsUnique<>()));
+        EXPECT_TRUE((ParameterPack<>::isUnique()));
     }
 } // PackIsUniqueTests
 
 namespace PackIsSubsetTests {
     STEST(PackIsSubset) {
-        EXPECT_TRUE((packIsSubset(ParameterPack<int32_t, float, double>{}, ParameterPack<int32_t, float, double, char, uint8_t>{})));
+        EXPECT_TRUE((ParameterPack<int32_t, float, double, char, uint8_t>::contains<int32_t, float, double>()));
     }
 
     STEST(PackIsNotSubset) {
-        EXPECT_FALSE((packIsSubset(ParameterPack<int32_t, float, double>{}, ParameterPack<int32_t, float, char, uint8_t>{})));
+        EXPECT_FALSE((ParameterPack<int32_t, float, char, uint8_t>::contains<int32_t, float, double>()));
     }
 
     STEST(EmptyPackIsSubset) {
-        EXPECT_TRUE((packIsSubset({}, ParameterPack<int32_t, float, char, uint8_t>{})));
+        EXPECT_TRUE((ParameterPack<int32_t, float, char, uint8_t>::contains()));
     }
 } // PackIsSubsetTests
 
 namespace PacksAreEquivalentTests {
     STEST(PacksAreEquivalent) {
-        EXPECT_TRUE((packsAreEquivalent(ParameterPack<int32_t, float, double>{}, ParameterPack<float, double, int32_t>{})));
+        EXPECT_TRUE((ParameterPack<int32_t, float, double>::equivalent<float, double, int32_t>()));
     }
 
     STEST(PacksAreNotEquivalentElementsDifferent) {
-        EXPECT_FALSE((packsAreEquivalent(ParameterPack<int32_t, uint8_t, double>{}, ParameterPack<float, double, int32_t>{})));
+        EXPECT_FALSE((ParameterPack<int32_t, uint8_t, double>::equivalent<float, double, int32_t>()));
     }
 
     STEST(PacksAreNotEquivalentLengthDifferent) {
-        EXPECT_FALSE((packsAreEquivalent(ParameterPack<int32_t, char, float, double>{}, ParameterPack<float, double, int32_t>{})));
+        EXPECT_FALSE((ParameterPack<int32_t, char, float, double>::equivalent<float, double, int32_t>()));
     }
 
     STEST(EmptyPacksAreEquivalent) {
-        EXPECT_TRUE((packsAreEquivalent({}, ParameterPack{})));
+        EXPECT_TRUE((ParameterPack<>::equivalent()));
     }
 } // PacksAreEquivalentTests
 

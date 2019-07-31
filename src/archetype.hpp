@@ -9,20 +9,14 @@ namespace Stealth::Engine {
     template <typename... ComponentTypes>
     class Archetype {
     public:
-        template <typename ComponentType>
-        using StorageType = std::vector<ComponentType>;
-    protected:
-        std::tuple<StorageType<ComponentTypes>...> mComponents;
-        size_t mSize{0}; // The number of entities in this Archetype.
-    public:
+        template <typename T>
+        using StorageType = std::vector<T>;
+
+        using ComponentPack = ParameterPack<ComponentTypes...>;
+
         // When an Archetype is constructed, it will check whether it contains duplicate component types
         constexpr Archetype() {
-            static_assert(packIsUnique<ComponentTypes...>(), "Archetype cannot contain duplicate component types");
-        }
-
-        template <typename T>
-        static constexpr bool containsType() noexcept {
-            return packContains<T, ComponentTypes...>();
+            static_assert(ComponentPack::isUnique(), "Archetype cannot contain duplicate component types");
         }
 
         constexpr size_t size() const {
@@ -32,7 +26,7 @@ namespace Stealth::Engine {
         // Adds the provided components to mComponents and returns the index of the newly added components.
         template <typename... Args>
         size_t addComponents(Args&&... components) {
-            static_assert(packsAreEquivalent(ParameterPack<removeCVRef<Args>...>{}, ParameterPack<ComponentTypes...>{}), "Component types do not match the types of this Archetype");
+            static_assert(ComponentPack::template equivalent<removeCVRef<Args>...>(), "Component types do not match the types of this Archetype");
             // Add each component to the appropriate vector.
             (std::get<StorageType<removeCVRef<Args>>>(mComponents).emplace_back(std::forward<Args&&>(components)), ...);
             return mSize++;
@@ -40,7 +34,7 @@ namespace Stealth::Engine {
 
         template <typename ComponentType>
         constexpr const StorageType<ComponentType>& storage() const {
-            static_assert(Archetype::containsType<ComponentType>(), "Cannot retrieve component type - this type is not present in the archetype");
+            static_assert(ComponentPack::template contains<ComponentType>(), "Cannot retrieve component type - this type is not present in the archetype");
             return std::get<StorageType<ComponentType>>(mComponents);
         }
 
@@ -55,6 +49,9 @@ namespace Stealth::Engine {
         constexpr std::tuple<const ComponentTypes&...> at(size_t index) const {
             return this->at<ComponentTypes...>(index);
         }
+    protected:
+        std::tuple<StorageType<ComponentTypes>...> mComponents;
+        size_t mSize{0}; // The number of entities in this Archetype.
     };
 } // Stealth::Engine
 
@@ -64,7 +61,8 @@ namespace std {
     // different between archetypes.
     template <typename... Args1, typename... Args2>
     struct is_same<Stealth::Engine::Archetype<Args1...>, Stealth::Engine::Archetype<Args2...>> {
-        static constexpr bool value = Stealth::Engine::packsAreEquivalent(Stealth::Engine::ParameterPack<Args1...>{}, Stealth::Engine::ParameterPack<Args2...>{});
+        using Pack1 = Stealth::Engine::ParameterPack<Args1...>;
+        static constexpr bool value = Pack1::template equivalent<Args2...>();
     };
 
     // To disambiguate from std::is_same<_Tp, _Tp> specialization.

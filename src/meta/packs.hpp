@@ -4,100 +4,70 @@
 
 // All comparisons rely on std::is_same, and will therefore respect any specializations of that metafunction.
 namespace Stealth::Engine {
-    template <typename... Args>
-    struct ParameterPack { };
+    template <typename... Parameters>
+    struct ParameterPack {
+    public:
+        // Returns true if this pack contains any of the specified types.
+        template <typename... Args>
+        static constexpr bool contains() noexcept {
+            if constexpr (sizeof...(Args) < 1) {
+                return true;
+            } else {
+                return containsImpl<Args...>();
+            }
+        }
+
+        // Returns the index of the specified type in this pack.
+        template <typename Elem>
+        static constexpr std::size_t index() noexcept {
+            static_assert(contains<Elem>(), "Cannot find index of type, because pack does not contain this type");
+            return indexImpl<Elem, 0, Parameters...>();
+        }
+
+        static constexpr bool isUnique() noexcept {
+            if constexpr (sizeof...(Parameters) <= 1) {
+                return true;
+            } else {
+                return isUniqueImpl<Parameters...>();
+            }
+        }
+
+        template <typename... Args>
+        static constexpr bool equivalent() noexcept {
+            if constexpr (sizeof...(Parameters) != sizeof...(Args)) {
+                return false;
+            } else {
+                return contains<Args...>();
+            }
+        }
+
+    protected:
+        template <typename Elem, typename... Rest>
+        static constexpr bool containsImpl() noexcept {
+            return (std::is_same_v<Elem, Parameters> || ...) && contains<Rest...>();
+        }
+
+        template <typename Elem, int Index, typename First, typename... Rest>
+        static constexpr std::size_t indexImpl() noexcept {
+            if constexpr (std::is_same_v<Elem, First>) {
+                return Index;
+            } else {
+                // sizeof...(Rest) will always be at least 1. The function will return before it reaches 0.
+                // This is guaranteed by the contains() check.
+                return indexImpl<Elem, Index + 1, Rest...>();
+            }
+        }
+
+        template <typename First, typename... Rest>
+        static constexpr bool isUniqueImpl() noexcept {
+            using RestPack = ParameterPack<Rest...>;
+            return (!RestPack::template contains<First>() && RestPack::isUnique());
+        }
+    };
 
     template <typename T>
     using removeCVRef = std::remove_cv_t<std::remove_reference_t<T>>;
 
-    // Determines whether a parameter pack, Args, contains the specified type, Elem.
-    template <typename Elem, typename... Args>
-    constexpr bool packContains() noexcept;
-
-    // Determines the index at which a parameter pack, Args, contains the specified type, Elem.
-    template <typename Elem, typename... Args>
-    constexpr int packIndex() noexcept;
-
-    // Determines whether a parameter pack contains unique types.
-    template <typename... Args>
-    constexpr bool packIsUnique() noexcept;
-
-    // TODO: Pass tuple as template argument.
-    // Determines whether the left-hand side pack is a subset of the right-hand side pack.
-    template <typename... Args1, typename... Args2>
-    constexpr bool packIsSubset(const ParameterPack<Args1...>& lhs, const ParameterPack<Args2...>& rhs) noexcept;
-
-    // Determines whether two packs contain the same types, regardless of order.
-    template <typename... Args1, typename... Args2>
-    constexpr bool packsAreEquivalent(const ParameterPack<Args1...>& lhs, const ParameterPack<Args2...>& rhs) noexcept;
-} // Stealth::Engine
-
-namespace Stealth::Engine {
-    template <typename Elem, typename... Args>
-    constexpr bool packContains() noexcept {
-        return (std::is_same_v<Elem, Args> || ...);
-    }
-
-
-    template <typename Elem, int Index, typename First, typename... Args>
-    constexpr int packIndexImpl() noexcept {
-        if constexpr (std::is_same_v<Elem, First>) {
-            return Index;
-        } else {
-            // sizeof...(Args) will always be at least 1. The function will return before it reaches 0.
-            return packIndexImpl<Elem, Index + 1, Args...>();
-        }
-    }
-
-    template <typename Elem, typename... Args>
-    constexpr int packIndex() noexcept {
-        static_assert(packContains<Elem, Args...>(), "Cannot find index of type, because pack does not contain this type");
-        return packIndexImpl<Elem, 0, Args...>();
-    }
-
-
-    template <typename T1, typename... Args>
-    constexpr bool packIsUniqueImpl() noexcept {
-        return (!packContains<T1, Args...>() && packIsUnique<Args...>());
-    }
-
-    template <typename... Args>
-    constexpr bool packIsUnique() noexcept {
-        if constexpr (sizeof...(Args) <= 1) {
-            return true;
-        } else {
-            return packIsUniqueImpl<Args...>();
-        }
-    }
-
-
-    // Loops over LHS and checks whether each type is present in the RHS
-    template <typename T1, typename... Args1, typename... Args2>
-    constexpr bool packIsSubsetImpl(const ParameterPack<T1, Args1...>& lhs, const ParameterPack<Args2...>& rhs) noexcept {
-        return packContains<T1, Args2...>() && packIsSubset(ParameterPack<Args1...>{}, rhs);
-    }
-
-    template <typename... Args1, typename... Args2>
-    constexpr bool packIsSubset(const ParameterPack<Args1...>& lhs, const ParameterPack<Args2...>& rhs) noexcept {
-        if constexpr (sizeof...(Args1) == 0) {
-            return true;
-        } else {
-            return packIsSubsetImpl(lhs, rhs);
-        }
-    }
-
-
-    template <typename... Args1, typename... Args2>
-    constexpr bool packsAreEquivalent(const ParameterPack<Args1...>& lhs, const ParameterPack<Args2...>& rhs) noexcept {
-        static_assert(packIsUnique<Args1...>() && packIsUnique<Args2...>(), "Cannot compare non-unique packs for equivalency!");
-        if constexpr (sizeof...(Args1) != sizeof...(Args2)) {
-            return false;
-        } else if constexpr (sizeof...(Args1) <= 1 || sizeof...(Args2) <= 1) {
-            return true;
-        } else {
-            return packIsSubset(lhs, rhs);
-        }
-    }
 } // Stealth::Engine
 
 #endif // META_PACKS_HPP
