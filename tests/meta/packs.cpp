@@ -92,10 +92,21 @@ namespace PacksAreEquivalentTests {
 } // PacksAreEquivalentTests
 
 namespace PacksCanStoreValuesTests {
-    STEST(PackCanStoreValues) {
-        Pack<int32_t, float> pack{42, 0.f};
+    struct IFPackFixture {
+        using IFPack = Pack<int32_t, float>;
+        IFPack pack{42, 0.f};
+    };
+
+    STEST_F(IFPackFixture, CanConstruct) { }
+
+    STEST_F(IFPackFixture, PackCanIndexByType) {
         EXPECT_EQ(pack.at<int32_t>(), 42);
         EXPECT_EQ(pack.at<float>(), 0.f);
+    }
+
+    STEST_F(IFPackFixture, PackCanIndexByNumber) {
+        EXPECT_EQ(pack.at<0>(), 42);
+        EXPECT_EQ(pack.at<1>(), 0.f);
     }
 } // PacksCanStoreValuesTests
 

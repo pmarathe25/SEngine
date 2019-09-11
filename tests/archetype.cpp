@@ -55,15 +55,14 @@ STEST(ArchetypeContainsCorrectElements) {
     static_assert(IFDC::ComponentPack::contains<char, double, float, int32_t>(), "Archetype does not contain correct components");
 }
 
-class PopulatedIFFixture {
-public:
+struct PopulatedIFFixture {
     PopulatedIFFixture() {
         // These will each be reordered to (int32_t, float)
         archetype.addComponents(0.f, 1);
         archetype.addComponents(67, 1.f);
         archetype.addComponents(0, 3.14f);
     }
-protected:
+
     IFArchetype archetype{};
 };
 
