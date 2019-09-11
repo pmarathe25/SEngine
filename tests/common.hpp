@@ -3,7 +3,6 @@
 #include "archetype.hpp"
 #include <STest.hpp>
 
-
 namespace common {
     using Stealth::Engine::Archetype;
     using IFArchetype = Archetype<int32_t, float>;

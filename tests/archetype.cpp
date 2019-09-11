@@ -71,20 +71,21 @@ protected:
 };
 
 STEST_F(PopulatedIFFixture, CanGetTupleOfReferencesToComponents) {
-    const auto iftuple = archetype.at(0);
-    EXPECT_EQ(std::get<0>(iftuple), 1);
-    EXPECT_EQ(std::get<1>(iftuple), 0.f);
+    static_assert(std::is_same_v<decltype(archetype.at(0)), std::tuple<const int32_t&, const float&>>, "at() should return a tuple of references");
+    const auto& [i, f] = archetype.at(0);
+    EXPECT_EQ(i, 1);
+    EXPECT_EQ(f, 0.f);
 }
 
 STEST_F(PopulatedIFFixture, CanGetReorderedTupleOfReferencesToComponents) {
-    const auto fituple = archetype.at<float, int32_t>(1);
-    EXPECT_EQ(std::get<0>(fituple), 1.f);
-    EXPECT_EQ(std::get<1>(fituple), 67);
+    const auto& [f, i] = archetype.at<float, int32_t>(1);
+    EXPECT_EQ(f, 1.f);
+    EXPECT_EQ(i, 67);
 }
 
 STEST_F(PopulatedIFFixture, CanGetTupleOfSelectedReferencesToComponents) {
-    const auto fituple = archetype.at<float>(1);
-    EXPECT_EQ(std::get<0>(fituple), 1.f);
+    const auto& [f] = archetype.at<float>(1);
+    EXPECT_EQ(f, 1.f);
 }
 
 STEST_MAIN();
