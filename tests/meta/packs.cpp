@@ -91,4 +91,13 @@ namespace PacksAreEquivalentTests {
     }
 } // PacksAreEquivalentTests
 
+namespace PacksCanStoreValuesTests {
+    STEST(PackCanStoreValues) {
+        Pack<int32_t, float> pack{42, 0.f};
+        EXPECT_EQ(pack.at<int32_t>(), 42);
+        EXPECT_EQ(pack.at<float>(), 0.f);
+    }
+} // PacksCanStoreValuesTests
+
+
 STEST_MAIN();
