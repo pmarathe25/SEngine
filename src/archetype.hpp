@@ -3,7 +3,6 @@
 #include "meta/helpers.hpp"
 #include "meta/packs.hpp"
 #include <SLog.hpp>
-#include <tuple>
 #include <vector>
 
 namespace Stealth::Engine {
@@ -13,7 +12,8 @@ namespace Stealth::Engine {
         template <typename T>
         using StorageType = std::vector<T>;
 
-        using ComponentPack = ParameterPack<ComponentTypes...>;
+        using ComponentPack = Pack<ComponentTypes...>;
+        using ComponentStoragePack = Pack<StorageType<ComponentTypes>...>;
 
         constexpr Archetype() {
             static_assert(ComponentPack::isUnique(), "Archetype cannot contain duplicate component types");
@@ -28,31 +28,31 @@ namespace Stealth::Engine {
         size_t addComponents(Args&&... components) {
             static_assert(ComponentPack::template equivalent<removeCVRef<Args>...>(), "Component types do not match the types of this Archetype");
             // Add each component to the appropriate vector.
-            (std::get<StorageType<removeCVRef<Args>>>(mComponents).emplace_back(std::forward<Args&&>(components)), ...);
+            (mComponents.template at<StorageType<removeCVRef<Args>>>().emplace_back(std::forward<Args&&>(components)), ...);
             return mSize++;
         }
 
-        // Returns a tuple of references to components in this archetype.
+        // Returns a Pack of references to components in this archetype.
         // Types and ordering can be specified, but defaults to the types and ordering of the Archetype.
         // This function can also be used to select a subset of the component types.
         template <typename... SelectedComponents>
-        constexpr std::tuple<const SelectedComponents&...> at(size_t index) const {
+        constexpr Pack<const SelectedComponents&...> at(size_t index) const {
             checkBounds(index);
-            return std::tuple<const SelectedComponents&...>{this->storage<SelectedComponents>()[index]...};
+            return Pack<const SelectedComponents&...>{this->storage<SelectedComponents>()[index]...};
         }
 
-        constexpr std::tuple<const ComponentTypes&...> at(size_t index) const {
+        constexpr Pack<const ComponentTypes&...> at(size_t index) const {
             return this->at<ComponentTypes...>(index);
         }
 
-        // constexpr std::tuple<ComponentTypes...> remove(size_t index) {
+        // constexpr ComponentPack remove(size_t index) {
         //     // TODO: Fill this out
         // }
     protected:
         template <typename ComponentType>
         const constexpr StorageType<ComponentType>& storage() const {
             static_assert(ComponentPack::template contains<ComponentType>(), "Cannot retrieve component type - this type is not present in the archetype");
-            return std::get<StorageType<ComponentType>>(mComponents);
+            return mComponents.template at<StorageType<ComponentType>>();
         }
 
         void checkBounds(size_t index) const {
@@ -64,7 +64,7 @@ namespace Stealth::Engine {
 #endif
         }
 
-        std::tuple<StorageType<ComponentTypes>...> mComponents;
+        ComponentStoragePack mComponents;
         size_t mSize{0}; // The number of entities in this Archetype.
     };
 } // Stealth::Engine
@@ -75,7 +75,7 @@ namespace std {
     // different between archetypes.
     template <typename... Args1, typename... Args2>
     struct is_same<Stealth::Engine::Archetype<Args1...>, Stealth::Engine::Archetype<Args2...>> {
-        using Pack1 = Stealth::Engine::ParameterPack<Args1...>;
+        using Pack1 = Stealth::Engine::Pack<Args1...>;
         static constexpr bool value = Pack1::template equivalent<Args2...>();
     };
 

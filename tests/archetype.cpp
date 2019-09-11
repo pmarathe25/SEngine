@@ -70,20 +70,20 @@ protected:
     common::IFArchetype archetype{};
 };
 
-STEST_F(PopulatedIFFixture, CanGetTupleOfReferencesToComponents) {
-    static_assert(std::is_same_v<decltype(archetype.at(0)), std::tuple<const int32_t&, const float&>>, "at() should return a tuple of references");
+STEST_F(PopulatedIFFixture, CanGetPackOfReferencesToComponents) {
+    static_assert(std::is_same_v<decltype(archetype.at(0)), Stealth::Engine::Pack<const int32_t&, const float&>>, "at() should return a Pack of references");
     const auto& [i, f] = archetype.at(0);
     EXPECT_EQ(i, 1);
     EXPECT_EQ(f, 0.f);
 }
 
-STEST_F(PopulatedIFFixture, CanGetReorderedTupleOfReferencesToComponents) {
+STEST_F(PopulatedIFFixture, CanGetReorderedPackOfReferencesToComponents) {
     const auto& [f, i] = archetype.at<float, int32_t>(1);
     EXPECT_EQ(f, 1.f);
     EXPECT_EQ(i, 67);
 }
 
-STEST_F(PopulatedIFFixture, CanGetTupleOfSelectedReferencesToComponents) {
+STEST_F(PopulatedIFFixture, CanGetPackOfSelectedReferencesToComponents) {
     const auto& [f] = archetype.at<float>(1);
     EXPECT_EQ(f, 1.f);
 }
