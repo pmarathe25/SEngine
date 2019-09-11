@@ -2,6 +2,7 @@
 #define WORLD_HPP
 #include "entity.hpp"
 #include "archetype.hpp"
+#include "meta/helpers.hpp"
 #include "meta/packs.hpp"
 #include <tuple>
 

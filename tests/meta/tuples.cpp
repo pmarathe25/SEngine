@@ -1,5 +1,5 @@
 #include "meta/tuples.hpp"
-#include <Stealth/STest.hpp>
+#include <STest.hpp>
 
 using Stealth::Engine::tupleSelect;
 

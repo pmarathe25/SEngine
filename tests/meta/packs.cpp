@@ -1,5 +1,6 @@
+#include "meta/helpers.hpp"
 #include "meta/packs.hpp"
-#include <Stealth/STest.hpp>
+#include <STest.hpp>
 
 using Stealth::Engine::removeCVRef, Stealth::Engine::ParameterPack;
 

@@ -1,7 +1,7 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 #include "archetype.hpp"
-#include <Stealth/STest.hpp>
+#include <STest.hpp>
 
 
 namespace common {
