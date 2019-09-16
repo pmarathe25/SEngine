@@ -1,7 +1,9 @@
 #ifndef ARCHETYPE_HPP
 #define ARCHETYPE_HPP
+#include "memory/bidirectionalMap.hpp"
 #include "meta/helpers.hpp"
 #include "meta/packs.hpp"
+#include "entity.hpp"
 #include <SLog.hpp>
 #include <vector>
 
@@ -19,30 +21,16 @@ namespace Stealth::Engine {
             static_assert(ComponentPack::isUnique(), "Archetype cannot contain duplicate component types");
         }
 
-        constexpr size_t size() const {
-            return mSize;
-        }
-
         // Adds the provided components to mComponents and returns the index of the newly added components.
         template <typename... Args>
-        size_t addComponents(Args&&... components) {
+        size_t addComponents(EntityID entity, Args&&... components) {
             static_assert(ComponentPack::template equivalent<removeCVRef<Args>...>(), "Component types do not match the types of this Archetype");
             // Add each component to the appropriate vector.
-            (mComponents.template at<StorageType<removeCVRef<Args>>>().emplace_back(std::forward<Args&&>(components)), ...);
-            return mSize++;
-        }
+            (this->storage<removeCVRef<Args>>().emplace_back(std::forward<Args&&>(components)), ...);
 
-        // Returns a Pack of references to components in this archetype.
-        // Types and ordering can be specified, but defaults to the types and ordering of the Archetype.
-        // This function can also be used to select a subset of the component types.
-        template <typename... SelectedComponents>
-        constexpr Pack<const SelectedComponents&...> at(size_t index) const {
-            checkBounds(index);
-            return Pack<const SelectedComponents&...>{this->storage<SelectedComponents>()[index]...};
-        }
-
-        constexpr Pack<const ComponentTypes&...> at(size_t index) const {
-            return this->at<ComponentTypes...>(index);
+            size_t index = mSize++;
+            mEntityMap[entity] = index; 
+            return index;
         }
 
         // constexpr ComponentPack remove(size_t index) {
@@ -50,20 +38,19 @@ namespace Stealth::Engine {
         // }
     protected:
         template <typename ComponentType>
-        const constexpr StorageType<ComponentType>& storage() const {
+        constexpr StorageType<ComponentType>& storage() {
             static_assert(ComponentPack::template contains<ComponentType>(), "Cannot retrieve component type - this type is not present in the archetype");
             return mComponents.template at<StorageType<ComponentType>>();
         }
 
         void checkBounds(size_t index) const {
-#ifdef S_DEBUG
             if (index >= mSize)
             {
                 throw std::out_of_range{"Index is out of range of Archetype"};
             }
-#endif
         }
 
+        BidirectionalMap<EntityID, size_t> mEntityMap; // Maps entities to their component indexes.
         ComponentStoragePack mComponents;
         size_t mSize{0}; // The number of entities in this Archetype.
     };

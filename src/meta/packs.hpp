@@ -50,22 +50,22 @@ namespace Stealth::Engine {
         }
 
         template <std::size_t Index>
-        auto& at() noexcept {
+        constexpr auto& at() noexcept {
             return std::get<Index>(*this);
         }
 
         template <std::size_t Index>
-        const auto& at() const noexcept {
+        constexpr const auto& at() const noexcept {
             return std::get<Index>(*this);
         }
 
         template <typename Type>
-        Type& at() noexcept {
+        constexpr Type& at() noexcept {
             return std::get<Type>(*this);
         }
 
         template <typename Type>
-        const Type& at() const noexcept {
+        constexpr const Type& at() const noexcept {
             return std::get<Type>(*this);
         }
 

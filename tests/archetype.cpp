@@ -12,6 +12,8 @@ STEST(CanConstruct) {
 }
 
 namespace InternalTests {
+    constexpr Stealth::Engine::EntityID testEntity{0};
+
     STEST_F(IFArchetype, CanGetVectors) {
         EXPECT_TRUE((std::is_same_v<removeCVRef<decltype(this->storage<int32_t>())>, IFArchetype::StorageType<int32_t>>));
         EXPECT_EQ(this->storage<int32_t>().size(), 0);
@@ -20,7 +22,7 @@ namespace InternalTests {
     STEST_F(IFArchetype, CanAddComponentsInOrder) {
         constexpr int32_t i = 10;
         constexpr float f = 0.125f;
-        this->addComponents(i, f);
+        this->addComponents(testEntity, i, f);
         EXPECT_EQ(this->storage<int32_t>().size(), 1);
         EXPECT_EQ(this->storage<int32_t>().at(0), i);
         EXPECT_EQ(this->storage<float>().size(), 1);
@@ -30,7 +32,7 @@ namespace InternalTests {
     STEST_F(IFArchetype, CanAddComponentsOutOfOrder) {
         constexpr int32_t i = 10;
         constexpr float f = 0.125f;
-        this->addComponents(f, i);
+        this->addComponents(testEntity, f, i);
         EXPECT_EQ(this->storage<int32_t>().size(), 1);
         EXPECT_EQ(this->storage<int32_t>().at(0), i);
         EXPECT_EQ(this->storage<float>().size(), 1);
@@ -53,35 +55,6 @@ STEST(DifferentArchetypesAreDifferent) {
 STEST(ArchetypeContainsCorrectElements) {
     using IFDC = Archetype<int32_t, float, double, char>;
     static_assert(IFDC::ComponentPack::contains<char, double, float, int32_t>(), "Archetype does not contain correct components");
-}
-
-struct PopulatedIFFixture {
-    PopulatedIFFixture() {
-        // These will each be reordered to (int32_t, float)
-        archetype.addComponents(0.f, 1);
-        archetype.addComponents(67, 1.f);
-        archetype.addComponents(0, 3.14f);
-    }
-
-    IFArchetype archetype{};
-};
-
-STEST_F(PopulatedIFFixture, CanGetPackOfReferencesToComponents) {
-    static_assert(std::is_same_v<decltype(archetype.at(0)), Stealth::Engine::Pack<const int32_t&, const float&>>, "at() should return a Pack of references");
-    const auto& [i, f] = archetype.at(0);
-    EXPECT_EQ(i, 1);
-    EXPECT_EQ(f, 0.f);
-}
-
-STEST_F(PopulatedIFFixture, CanGetReorderedPackOfReferencesToComponents) {
-    const auto& [f, i] = archetype.at<float, int32_t>(1);
-    EXPECT_EQ(f, 1.f);
-    EXPECT_EQ(i, 67);
-}
-
-STEST_F(PopulatedIFFixture, CanGetPackOfSelectedReferencesToComponents) {
-    const auto& [f] = archetype.at<float>(1);
-    EXPECT_EQ(f, 1.f);
 }
 
 STEST_MAIN();

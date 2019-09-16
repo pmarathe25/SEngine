@@ -17,14 +17,14 @@ namespace Stealth::Engine {
         }
 
         template <typename... ComponentTypes>
-        Entity createEntity(ComponentTypes&&... components) {
+        EntityID createEntity(ComponentTypes&&... components) {
             using EntityArchetype = Archetype<removeCVRef<ComponentTypes>...>;
             static_assert(ArchetypePack::template contains<EntityArchetype>(), "This archetype has not been registered");
             // Find Archetype in mArchetypes
             static constexpr int Index = ArchetypePack::template index<EntityArchetype>();
             auto& archetype = mArchetypes.template at<Index>();
             // Add entity to appropriate archetype.
-            archetype.addComponents(std::forward<ComponentTypes&&>(components)...);
+            archetype.addComponents(mNextEntity, std::forward<ComponentTypes&&>(components)...);
             return mNextEntity++;
         }
 
@@ -32,7 +32,7 @@ namespace Stealth::Engine {
 
     protected:
         ArchetypePack mArchetypes{};
-        Entity mNextEntity{0};
+        EntityID mNextEntity{0};
     };
 } // Stealth::Engine
 
