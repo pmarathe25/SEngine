@@ -4,7 +4,7 @@
 #include "meta/helpers.hpp"
 #include "meta/packs.hpp"
 #include "entity.hpp"
-#include <SLog.hpp>
+#include <cstddef> // For std::size_t
 #include <vector>
 
 namespace Stealth::Engine {
@@ -23,17 +23,17 @@ namespace Stealth::Engine {
 
         // Adds the provided components to mComponents and returns the index of the newly added components.
         template <typename... Args>
-        size_t addComponents(EntityID entity, Args&&... components) {
+        std::size_t addComponents(EntityID entity, Args&&... components) {
             static_assert(ComponentPack::template equivalent<removeCVRef<Args>...>(), "Component types do not match the types of this Archetype");
             // Add each component to the appropriate vector.
             (this->storage<removeCVRef<Args>>().emplace_back(std::forward<Args&&>(components)), ...);
 
-            size_t index = mSize++;
-            mEntityMap[entity] = index; 
+            std::size_t index = mSize++;
+            mEntityMap.set(entity, index);
             return index;
         }
 
-        // constexpr ComponentPack remove(size_t index) {
+        // constexpr ComponentPack remove(EntityID index) {
         //     // TODO: Fill this out
         // }
     protected:
@@ -43,16 +43,9 @@ namespace Stealth::Engine {
             return mComponents.template at<StorageType<ComponentType>>();
         }
 
-        void checkBounds(size_t index) const {
-            if (index >= mSize)
-            {
-                throw std::out_of_range{"Index is out of range of Archetype"};
-            }
-        }
-
-        BidirectionalMap<EntityID, size_t> mEntityMap; // Maps entities to their component indexes.
+        BidirectionalMap<EntityID, std::size_t> mEntityMap; // Maps entities to their component indexes.
         ComponentStoragePack mComponents;
-        size_t mSize{0}; // The number of entities in this Archetype.
+        std::size_t mSize{0}; // The number of entities in this Archetype.
     };
 } // Stealth::Engine
 
