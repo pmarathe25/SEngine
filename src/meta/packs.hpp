@@ -95,6 +95,7 @@ namespace Stealth::Engine {
 
 } // Stealth::Engine
 
+// To enable std::get
 namespace std {
     template<typename... Types>
     struct tuple_size<Stealth::Engine::Pack<Types...>> : std::tuple_size<std::tuple<Types...>> {};

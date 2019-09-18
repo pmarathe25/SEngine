@@ -14,17 +14,17 @@ namespace Stealth::Engine {
             return m2.count(value) == 1;
         }
 
-        const Value& valueAt(Key key) const {
+        const Value& valueAt(const Key& key) const {
             return *m1.at(key);
         }
 
-        const Key& keyAt(Value value) const {
+        const Key& keyAt(const Value& value) const {
             return *m2.at(value);
         }
 
         void set(Key key, Value value) {
-            const auto& [keyIter, insertedKey] = m1.insert_or_assign(key, nullptr);
-            const auto& [valIter, insertedVal] = m2.insert_or_assign(value, &keyIter->first);
+            const auto& [keyIter, insertedKey] = m1.insert_or_assign(std::move(key), nullptr);
+            const auto& [valIter, insertedVal] = m2.insert_or_assign(std::move(value), &keyIter->first);
             m1[key] = &valIter->first;
         }
     protected:
