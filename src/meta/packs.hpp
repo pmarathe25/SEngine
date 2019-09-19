@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <tuple>
 #include <cstddef>
+#include <functional> // For std::invoke
 
 // TODO: Implement Pack::visit
 
@@ -67,6 +68,11 @@ namespace Stealth::Engine {
         template <typename Type>
         constexpr const Type& at() const noexcept {
             return std::get<Type>(*this);
+        }
+
+        template <typename F>
+        constexpr void visit(F&& f) {
+            (std::invoke(std::forward<F&&>(f), this->at<Types>()), ...);
         }
 
     protected:

@@ -17,18 +17,24 @@ namespace Stealth::Engine {
 
         explicit operator UnderlyingType() const { return mID; }
 
-        constexpr EntityID& operator++() noexcept {
-            ++mID;
-            return (*this);
-        }
-
-        constexpr EntityID operator++(int) noexcept {
-            return EntityID{mID++};
+        constexpr EntityID next() const noexcept {
+            return EntityID{mID + 1};
         }
 
         constexpr bool operator==(const EntityID& other) const noexcept {
             return mID == other.mID;
         }
+    };
+
+    class Entity {
+    public:
+        explicit constexpr Entity(EntityID id) : mID{std::move(id)} { }
+
+        constexpr const EntityID& id() const noexcept {
+            return mID;
+        }
+    protected:
+        EntityID mID;
     };
 } // Stealth::Engine
 

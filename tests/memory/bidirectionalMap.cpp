@@ -14,6 +14,8 @@ public:
 
 namespace InternalTests {
     STEST_F(IFBiMapFixture, CanInsertKeyValuePair) {
+        EXPECT_TRUE(this->containsKey(0));
+        EXPECT_TRUE(this->containsValue(1.0f));
         EXPECT_EQ(*m1[0], 1.0f);
         EXPECT_EQ(*m2[1.0f], 0);
     }
@@ -24,6 +26,14 @@ namespace InternalTests {
 
     STEST_F(IFBiMapFixture, ValueAccessorWorks) {
         EXPECT_EQ(this->valueAt(0), 1.0f);
+    }
+
+    STEST_F(IFBiMapFixture, CanRemoveKeyValuePair) {
+        EXPECT_TRUE(this->containsKey(0));
+        EXPECT_TRUE(this->containsValue(1.0f));
+        this->erase(0);
+        EXPECT_FALSE(this->containsKey(0));
+        EXPECT_FALSE(this->containsValue(1.0f));
     }
 } // InternalTests
 

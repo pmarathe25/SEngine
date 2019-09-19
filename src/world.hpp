@@ -17,19 +17,27 @@ namespace Stealth::Engine {
         }
 
         template <typename... ComponentTypes>
-        EntityID createEntity(ComponentTypes&&... components) {
+        Entity createEntity(ComponentTypes&&... components) {
             using EntityArchetype = Archetype<removeCVRef<ComponentTypes>...>;
-            static_assert(ArchetypePack::template contains<EntityArchetype>(), "This archetype has not been registered");
+            static_assert(ArchetypePack::template contains<EntityArchetype>(), "This archetype has not been registered with this world");
             // Find Archetype in mArchetypes
-            static constexpr int Index = ArchetypePack::template index<EntityArchetype>();
+            static constexpr size_t Index = ArchetypePack::template index<EntityArchetype>();
             auto& archetype = mArchetypes.template at<Index>();
             // Add entity to appropriate archetype.
-            archetype.addComponents(mNextEntity, std::forward<ComponentTypes&&>(components)...);
-            return mNextEntity++;
+            Entity currentEntity{mNextEntity};
+            mNextEntity = mNextEntity.next();
+            archetype.addEntity(currentEntity.id(), std::forward<ComponentTypes&&>(components)...);
+            return currentEntity;
         }
 
-        // TODO: Implement destroyEntity using Pack::visit.
-
+        // TODO: Check if this is way too slow.
+        void destroyEntity(EntityID id) {
+            mArchetypes.visit([&id](auto& archetype) {
+                if (archetype.containsEntity(id)) {
+                    archetype.removeEntity(id);
+                }
+            });
+        }
     protected:
         ArchetypePack mArchetypes{};
         EntityID mNextEntity{0};

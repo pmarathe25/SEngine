@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 namespace Stealth::Engine {
+    // Note that for this class, both keys and values must be unique.
     template <typename Key, typename Value>
     class BidirectionalMap {
     public:
@@ -26,6 +27,12 @@ namespace Stealth::Engine {
             const auto& [keyIter, insertedKey] = m1.insert_or_assign(std::move(key), nullptr);
             const auto& [valIter, insertedVal] = m2.insert_or_assign(std::move(value), &keyIter->first);
             m1[key] = &valIter->first;
+        }
+
+        void erase(Key key) {
+            const Value& val = this->valueAt(key);
+            m1.erase(key);
+            m2.erase(val);
         }
     protected:
         std::unordered_map<Key, const Value*> m1;

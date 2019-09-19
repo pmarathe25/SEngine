@@ -22,7 +22,8 @@ namespace InternalTests {
     STEST_F(IFArchetype, CanAddComponentsInOrder) {
         constexpr int32_t i = 10;
         constexpr float f = 0.125f;
-        this->addComponents(testEntity, i, f);
+        this->addEntity(testEntity, i, f);
+        EXPECT_EQ(this->size(), 1);
         EXPECT_EQ(this->storage<int32_t>().size(), 1);
         EXPECT_EQ(this->storage<int32_t>().at(0), i);
         EXPECT_EQ(this->storage<float>().size(), 1);
@@ -32,11 +33,33 @@ namespace InternalTests {
     STEST_F(IFArchetype, CanAddComponentsOutOfOrder) {
         constexpr int32_t i = 10;
         constexpr float f = 0.125f;
-        this->addComponents(testEntity, f, i);
+        this->addEntity(testEntity, f, i);
+        EXPECT_EQ(this->size(), 1);
         EXPECT_EQ(this->storage<int32_t>().size(), 1);
         EXPECT_EQ(this->storage<int32_t>().at(0), i);
         EXPECT_EQ(this->storage<float>().size(), 1);
         EXPECT_EQ(this->storage<float>().at(0), f);
+    }
+
+    STEST_F(IFArchetype, ContainsEntityWorks) {
+        constexpr int32_t i = 10;
+        constexpr float f = 0.125f;
+        this->addEntity(testEntity, f, i);
+        EXPECT_TRUE(this->containsEntity(testEntity));
+        EXPECT_FALSE(this->containsEntity(testEntity.next()));
+    }
+
+    STEST_F(IFArchetype, CanRemoveEntity) {
+        constexpr int32_t i = 10;
+        constexpr float f = 0.125f;
+        this->addEntity(testEntity, f, i);
+        const auto [iRemoved, fRemoved] = this->removeEntity(testEntity);
+        EXPECT_EQ(iRemoved, i);
+        EXPECT_EQ(fRemoved, f);
+        EXPECT_EQ(mSize, 0);
+        EXPECT_EQ(this->storage<int32_t>().size(), 0);
+        EXPECT_EQ(this->storage<float>().size(), 0);
+        EXPECT_EQ(this->size(), 0);
     }
 } // InternalTests
 

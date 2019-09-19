@@ -81,12 +81,12 @@ namespace PacksAreEquivalentTests {
     }
 } // PacksAreEquivalentTests
 
-namespace PacksCanStoreValuesTests {
-    struct IFPackFixture {
-        using IFPack = Pack<int32_t, float>;
-        IFPack pack{42, 0.f};
-    };
+struct IFPackFixture {
+    using IFPack = Pack<int32_t, float>;
+    IFPack pack{42, 0.f};
+};
 
+namespace PacksCanStoreValuesTests {
     STEST_F(IFPackFixture, CanConstruct) { }
 
     STEST_F(IFPackFixture, PackCanIndexByType) {
@@ -100,5 +100,18 @@ namespace PacksCanStoreValuesTests {
     }
 } // PacksCanStoreValuesTests
 
+namespace PackVisitTests {
+    STEST_F(IFPackFixture, CanVisitAllElements) {
+        pack.visit([](const auto& value){
+            if constexpr (std::is_same_v<decltype(value), const int32_t&>) {
+                EXPECT_EQ(value, 42);
+            } else if constexpr (std::is_same_v<decltype(value), const float&>) {
+                EXPECT_EQ(value, 0.f);
+            } else {
+                throw std::runtime_error{"Unexpected type in Pack"};
+            }
+        });
+    }
+} // PackVisitTests
 
 STEST_MAIN();
