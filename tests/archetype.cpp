@@ -56,10 +56,32 @@ namespace InternalTests {
         const auto [iRemoved, fRemoved] = this->removeEntity(testEntity);
         EXPECT_EQ(iRemoved, i);
         EXPECT_EQ(fRemoved, f);
-        EXPECT_EQ(mSize, 0);
         EXPECT_EQ(this->storage<int32_t>().size(), 0);
         EXPECT_EQ(this->storage<float>().size(), 0);
         EXPECT_EQ(this->size(), 0);
+    }
+
+    STEST_F(IFArchetype, CanRemoveEntitiesOutOfOrder) {
+        constexpr int32_t i = 10;
+        constexpr float f = 0.125f;
+        this->addEntity(testEntity, f, i);
+        this->addEntity(testEntity.next(), f + 1, i + 1);
+        {
+            const auto [iRemoved, fRemoved] = this->removeEntity(testEntity);
+            EXPECT_EQ(iRemoved, i);
+            EXPECT_EQ(fRemoved, f);
+            EXPECT_EQ(this->storage<int32_t>().size(), 1);
+            EXPECT_EQ(this->storage<float>().size(), 1);
+            EXPECT_EQ(this->size(), 1);
+        }
+        {
+            const auto [iRemoved, fRemoved] = this->removeEntity(testEntity.next());
+            EXPECT_EQ(iRemoved, i + 1);
+            EXPECT_EQ(fRemoved, f + 1);
+            EXPECT_EQ(this->storage<int32_t>().size(), 0);
+            EXPECT_EQ(this->storage<float>().size(), 0);
+            EXPECT_EQ(this->size(), 0);
+        }
     }
 } // InternalTests
 
